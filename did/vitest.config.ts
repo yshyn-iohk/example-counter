@@ -13,14 +13,33 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-pragma language_version 0.16;
+import { defineConfig } from "vitest/config";
 
-import CompactStandardLibrary;
-
-// public state
-export ledger round: Counter;
-
-// transition function changing public state
-export circuit increment(): [] {
-  round.increment(1);
-}
+export default defineConfig({
+  mode: "node",
+  test: {
+    deps: {
+      interopDefault: true
+    },
+    globals: true,
+    environment: "node",
+    include: ["**/*.test.ts"],
+    exclude: ["node_modules"],
+    root: ".",
+    coverage: {
+      provider: "v8",
+      reporter: ["text", "json", "html"],
+      thresholds: {
+        branches: 50,
+        functions: 73,
+        lines: 72,
+        statements: -269
+      }
+    },
+    reporters: ["default", ["junit", { outputFile: "reports/report.xml" }]]
+  },
+  resolve: {
+    extensions: [".ts", ".js"],
+    conditions: ["import", "node", "default"]
+  }
+});

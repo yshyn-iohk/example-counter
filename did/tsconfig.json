@@ -13,14 +13,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-pragma language_version 0.16;
-
-import CompactStandardLibrary;
-
-// public state
-export ledger round: Counter;
-
-// transition function changing public state
-export circuit increment(): [] {
-  round.increment(1);
+{
+  "include": ["src/**/*.ts"],
+  "compilerOptions": {
+    "rootDir": "src",
+    "outDir": "dist",
+    "declaration": true,
+    "lib": ["ESNext"],
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "allowJs": true,
+    "forceConsistentCasingInFileNames": true,
+    "noImplicitAny": true,
+    "strict": true,
+    "isolatedModules": true,
+    "sourceMap": true,
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true
+  }
 }

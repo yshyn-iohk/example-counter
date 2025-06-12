@@ -13,14 +13,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-pragma language_version 0.16;
+// This is how we type an empty object.
+export type CounterPrivateState = {
+  privateCounter: number;
+};
 
-import CompactStandardLibrary;
-
-// public state
-export ledger round: Counter;
-
-// transition function changing public state
-export circuit increment(): [] {
-  round.increment(1);
-}
+export const witnesses = {};

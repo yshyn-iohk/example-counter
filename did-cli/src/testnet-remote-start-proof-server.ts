@@ -13,14 +13,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-pragma language_version 0.16;
+import { createLogger } from './logger-utils.js';
+import { run } from './cli.js';
+import { currentDir, TestnetRemoteConfig } from './config.js';
+import { DockerComposeEnvironment, Wait } from 'testcontainers';
+import path from 'node:path';
 
-import CompactStandardLibrary;
-
-// public state
-export ledger round: Counter;
-
-// transition function changing public state
-export circuit increment(): [] {
-  round.increment(1);
-}
+const config = new TestnetRemoteConfig();
+const dockerEnv = new DockerComposeEnvironment(
+  path.resolve(currentDir, '..'),
+  'proof-server-testnet.yml',
+).withWaitStrategy('proof-server', Wait.forLogMessage('Actix runtime found; starting in Actix runtime', 1));
+const logger = await createLogger(config.logDir);
+await run(config, logger, dockerEnv);

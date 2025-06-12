@@ -13,14 +13,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-pragma language_version 0.16;
+import protobuf from 'protobufjs';
+import Long from 'long';
 
-import CompactStandardLibrary;
-
-// public state
-export ledger round: Counter;
-
-// transition function changing public state
-export circuit increment(): [] {
-  round.increment(1);
-}
+protobuf.util.Long = Long;
+protobuf.configure();

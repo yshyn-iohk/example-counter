@@ -13,14 +13,5 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-pragma language_version 0.16;
-
-import CompactStandardLibrary;
-
-// public state
-export ledger round: Counter;
-
-// transition function changing public state
-export circuit increment(): [] {
-  round.increment(1);
-}
+export * as Counter from "./managed/did/contract/index.cjs";
+export * from "./witnesses";

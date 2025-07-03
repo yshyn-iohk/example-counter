@@ -1,6 +1,6 @@
 // Combined Test Suite: did-document.test.ts + did-document2.test.ts
 
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect } from "vitest";
 import {
   parseDID,
   parseDIDURL,
@@ -13,172 +13,176 @@ import {
   createDIDDocument,
   KnownDIDMediaTypes,
   KnownDIDMediaTypesSchema,
-  VerificationMethodType,
-} from '../did-document';
+  VerificationMethodType
+} from "../did-document";
 
-describe('DID Schemas', () => {
-  it('parses valid DID', () => {
-    const result = parseDID('did:example:123');
-    expect(result).toBe('did:example:123');
+describe("DID Schemas", () => {
+  it("parses valid DID", () => {
+    const result = parseDID("did:example:123");
+    expect(result).toBe("did:example:123");
   });
 
-  it('rejects invalid DID', () => {
-    expect(() => parseDID('not-a-did')).toThrow();
+  it("rejects invalid DID", () => {
+    expect(() => parseDID("not-a-did")).toThrow();
   });
 
-  it('parses valid DID URL', () => {
-    const result = parseDIDURL('did:example:123/path?query#frag');
-    expect(result).toBe('did:example:123/path?query#frag');
+  it("parses valid DID URL", () => {
+    const result = parseDIDURL("did:example:123/path?query#frag");
+    expect(result).toBe("did:example:123/path?query#frag");
   });
 
-  it('rejects malformed DID URL', () => {
-    expect(() => parseDIDURL('http://example.com')).toThrow();
+  it("rejects malformed DID URL", () => {
+    expect(() => parseDIDURL("http://example.com")).toThrow();
   });
 
-  it('creates and validates VerificationMethod', () => {
+  it("creates and validates VerificationMethod", () => {
     const vm = createVerificationMethod({
-      id: 'did:example:123#key-1',
+      id: "did:example:123#key-1",
       type: VerificationMethodType.Ed25519VerificationKey2020,
-      controller: 'did:example:123',
-      publicKeyMultibase: 'z6Mks2R1',
+      controller: "did:example:123",
+      publicKeyMultibase: "z6Mks2R1"
     });
-    expect(vm.id).toBe('did:example:123#key-1');
+    expect(vm.id).toBe("did:example:123#key-1");
   });
 
-  it('creates and validates Service', () => {
+  it("creates and validates Service", () => {
     const service = createService({
-      id: 'did:example:123#svc-1',
-      type: 'LinkedDomains',
-      serviceEndpoint: 'https://example.com',
+      id: "did:example:123#svc-1",
+      type: "LinkedDomains",
+      serviceEndpoint: "https://example.com"
     });
-    expect(service.id).toBe('did:example:123#svc-1');
+    expect(service.id).toBe("did:example:123#svc-1");
   });
 
-  it('creates and validates DIDDocument', () => {
+  it("creates and validates DIDDocument", () => {
     const doc = createDIDDocument({
-      id: 'did:example:123',
-      context: 'https://www.w3.org/ns/did/v1',
+      id: "did:example:123",
+      context: "https://www.w3.org/ns/did/v1",
       verificationMethod: [
         createVerificationMethod({
-          id: 'did:example:123#key-1',
+          id: "did:example:123#key-1",
           type: VerificationMethodType.Ed25519VerificationKey2020,
-          controller: 'did:example:123',
-          publicKeyMultibase: 'z6Mks2R1',
-        }),
-      ],
+          controller: "did:example:123",
+          publicKeyMultibase: "z6Mks2R1"
+        })
+      ]
     });
-    expect(doc.id).toBe('did:example:123');
+    expect(doc.id).toBe("did:example:123");
   });
 
-  it('parses full DIDResolutionResult', () => {
+  it("parses full DIDResolutionResult", () => {
     const result = parseDIDResolutionResult({
-      '@context': 'https://w3id.org/did-resolution/v1',
+      "@context": "https://w3id.org/did-resolution/v1",
       didDocumentMetadata: {},
       didResolutionMetadata: {
-        contentType: 'application/did+json',
-      },
+        contentType: "application/did+json"
+      }
     });
-    expect(result.didResolutionMetadata.contentType).toBe('application/did+json');
+    expect(result.didResolutionMetadata.contentType).toBe(
+      "application/did+json"
+    );
   });
 
-  it('rejects unknown media type', () => {
+  it("rejects unknown media type", () => {
     expect(() =>
       parseDIDResolutionResult({
-        '@context': 'https://w3id.org/did-resolution/v1',
+        "@context": "https://w3id.org/did-resolution/v1",
         didDocumentMetadata: {},
         didResolutionMetadata: {
-          contentType: 'application/unknown',
-        },
+          contentType: "application/unknown"
+        }
       })
     ).toThrow();
   });
 
-  it('accepts all KnownDIDMediaTypes', () => {
+  it("accepts all KnownDIDMediaTypes", () => {
     const allKnownTypes = Object.values(KnownDIDMediaTypesSchema.def.entries);
 
     for (const type of allKnownTypes) {
       expect(KnownDIDMediaTypesSchema.parse(type)).toBe(type);
     }
   });
-  it('parses valid DID', () => {
-    const result = parseDID('did:example:123');
-    expect(result).toBe('did:example:123');
+  it("parses valid DID", () => {
+    const result = parseDID("did:example:123");
+    expect(result).toBe("did:example:123");
   });
 
-  it('rejects invalid DID', () => {
-    expect(() => parseDID('not-a-did')).toThrow();
+  it("rejects invalid DID", () => {
+    expect(() => parseDID("not-a-did")).toThrow();
   });
 
-  it('parses valid DID URL', () => {
-    const result = parseDIDURL('did:example:123/path?query#frag');
-    expect(result).toBe('did:example:123/path?query#frag');
+  it("parses valid DID URL", () => {
+    const result = parseDIDURL("did:example:123/path?query#frag");
+    expect(result).toBe("did:example:123/path?query#frag");
   });
 
-  it('rejects malformed DID URL', () => {
-    expect(() => parseDIDURL('http://example.com')).toThrow();
+  it("rejects malformed DID URL", () => {
+    expect(() => parseDIDURL("http://example.com")).toThrow();
   });
 
-  it('creates and validates VerificationMethod', () => {
+  it("creates and validates VerificationMethod", () => {
     const vm = createVerificationMethod({
-      id: 'did:example:123#key-1',
+      id: "did:example:123#key-1",
       type: VerificationMethodType.Ed25519VerificationKey2020,
-      controller: 'did:example:123',
-      publicKeyMultibase: 'z6Mks2R1',
+      controller: "did:example:123",
+      publicKeyMultibase: "z6Mks2R1"
     });
-    expect(vm.id).toBe('did:example:123#key-1');
+    expect(vm.id).toBe("did:example:123#key-1");
   });
 
-  it('creates and validates Service', () => {
+  it("creates and validates Service", () => {
     const service = createService({
-      id: 'did:example:123#svc-1',
-      type: 'LinkedDomains',
-      serviceEndpoint: 'https://example.com',
+      id: "did:example:123#svc-1",
+      type: "LinkedDomains",
+      serviceEndpoint: "https://example.com"
     });
-    expect(service.id).toBe('did:example:123#svc-1');
+    expect(service.id).toBe("did:example:123#svc-1");
   });
 
-  it('creates and validates DIDDocument', () => {
+  it("creates and validates DIDDocument", () => {
     const doc = createDIDDocument({
-      id: 'did:example:123',
-      context: 'https://www.w3.org/ns/did/v1',
+      id: "did:example:123",
+      context: "https://www.w3.org/ns/did/v1",
       alsoKnownAs: undefined,
       controller: undefined,
       verificationMethod: [
         createVerificationMethod({
-          id: 'did:example:123#key-1',
+          id: "did:example:123#key-1",
           type: VerificationMethodType.Ed25519VerificationKey2020,
-          controller: 'did:example:123',
-          publicKeyMultibase: 'z6Mks2R1',
-        }),
-      ],
+          controller: "did:example:123",
+          publicKeyMultibase: "z6Mks2R1"
+        })
+      ]
     });
-    expect(doc.id).toBe('did:example:123');
+    expect(doc.id).toBe("did:example:123");
   });
 
-  it('parses full DIDResolutionResult', () => {
+  it("parses full DIDResolutionResult", () => {
     const result = parseDIDResolutionResult({
-      '@context': 'https://w3id.org/did-resolution/v1',
+      "@context": "https://w3id.org/did-resolution/v1",
       didDocumentMetadata: {},
       didResolutionMetadata: {
-        contentType: 'application/did+json',
-      },
+        contentType: "application/did+json"
+      }
     });
-    expect(result.didResolutionMetadata.contentType).toBe('application/did+json');
+    expect(result.didResolutionMetadata.contentType).toBe(
+      "application/did+json"
+    );
   });
 
-  it('rejects unknown media type', () => {
+  it("rejects unknown media type", () => {
     expect(() =>
       parseDIDResolutionResult({
-        '@context': 'https://w3id.org/did-resolution/v1',
+        "@context": "https://w3id.org/did-resolution/v1",
         didDocumentMetadata: {},
         didResolutionMetadata: {
-          contentType: 'application/unknown',
-        },
+          contentType: "application/unknown"
+        }
       })
     ).toThrow();
   });
 
-  it('accepts all KnownDIDMediaTypes', () => {
+  it("accepts all KnownDIDMediaTypes", () => {
     const allKnownTypes = Object.values(KnownDIDMediaTypesSchema.def.entries);
 
     for (const type of allKnownTypes) {
@@ -186,42 +190,42 @@ describe('DID Schemas', () => {
     }
   });
 
-  it('parses string and string[] in controller field', () => {
+  it("parses string and string[] in controller field", () => {
     const single = createDIDDocument({
-      id: 'did:example:123',
-      controller: 'did:example:controller1',
+      id: "did:example:123",
+      controller: "did:example:controller1"
     });
-    expect(single.controller).toBe('did:example:controller1');
+    expect(single.controller).toBe("did:example:controller1");
 
     const multiple = createDIDDocument({
-      id: 'did:example:123',
-      controller: ['did:example:controller1', 'did:example:controller2'],
+      id: "did:example:123",
+      controller: ["did:example:controller1", "did:example:controller2"]
     });
     expect(Array.isArray(multiple.controller)).toBe(true);
     expect(multiple.controller).toHaveLength(2);
   });
 
-  it('parses string and string[] in service type', () => {
+  it("parses string and string[] in service type", () => {
     const single = createService({
-      id: 'did:example:123#svc',
-      type: 'LinkedDomains',
-      serviceEndpoint: 'https://example.com',
+      id: "did:example:123#svc",
+      type: "LinkedDomains",
+      serviceEndpoint: "https://example.com"
     });
-    expect(single.type).toBe('LinkedDomains');
+    expect(single.type).toBe("LinkedDomains");
 
     const multiple = createService({
-      id: 'did:example:123#svc',
-      type: ['LinkedDomains', 'Messaging'],
-      serviceEndpoint: 'https://example.com',
+      id: "did:example:123#svc",
+      type: ["LinkedDomains", "Messaging"],
+      serviceEndpoint: "https://example.com"
     });
     expect(Array.isArray(multiple.type)).toBe(true);
-    expect(multiple.type).toContain('Messaging');
+    expect(multiple.type).toContain("Messaging");
   });
 
-  it('accepts nullish optional fields', () => {
+  it("accepts nullish optional fields", () => {
     const doc = createDIDDocument({
-      id: 'did:example:abc',
-      context: 'https://w3id.org/did/v1',
+      id: "did:example:abc",
+      context: "https://w3id.org/did/v1",
       alsoKnownAs: undefined,
       controller: undefined,
       verificationMethod: undefined,
@@ -230,12 +234,11 @@ describe('DID Schemas', () => {
       keyAgreement: undefined,
       capabilityInvocation: undefined,
       capabilityDelegation: undefined,
-      service: undefined,
+      service: undefined
     });
 
-    expect(doc.id).toBe('did:example:abc');
+    expect(doc.id).toBe("did:example:abc");
     expect(doc.service).toBeNull();
     expect(doc.verificationMethod).toBeNull();
   });
 });
-

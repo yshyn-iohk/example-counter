@@ -16,7 +16,7 @@
 // This is how we type an empty object.
 
 export type MidnightDIDPrivateState = {
- //TODO: add private keys to protect the state from modification
+  //TODO: add private keys to protect the state from modification
 };
 
 export const witnesses = {};

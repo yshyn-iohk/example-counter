@@ -3,7 +3,7 @@ import {
   QueryContext,
   sampleContractAddress,
   constructorContext
-} from '@midnight-ntwrk/compact-runtime';
+} from "@midnight-ntwrk/compact-runtime";
 
 import {
   Contract,
@@ -12,9 +12,9 @@ import {
   VerificationMethodRelation,
   VerificationMethodType,
   VerificationMethod
-} from '../managed/did/contract/index.cjs';
+} from "../managed/did/contract/index.cjs";
 
-import { type MidnightDIDPrivateState, witnesses } from '../witnesses.js';
+import { type MidnightDIDPrivateState, witnesses } from "../witnesses.js";
 
 export class MidnightDIDSimulator {
   readonly contract: Contract<MidnightDIDPrivateState>;
@@ -26,9 +26,7 @@ export class MidnightDIDSimulator {
       currentPrivateState,
       currentContractState,
       currentZswapLocalState
-    } = this.contract.initialState(
-      constructorContext({}, '0'.repeat(64))
-    );
+    } = this.contract.initialState(constructorContext({}, "0".repeat(64)));
     this.circuitContext = {
       currentPrivateState,
       currentZswapLocalState,
@@ -56,7 +54,9 @@ export class MidnightDIDSimulator {
     return this.getLedger();
   }
 
-  public updateVerificationMethod(verificationMethod: VerificationMethod): Ledger {
+  public updateVerificationMethod(
+    verificationMethod: VerificationMethod
+  ): Ledger {
     this.circuitContext = this.contract.impureCircuits.updateVerificationMethod(
       this.circuitContext,
       verificationMethod
@@ -72,21 +72,29 @@ export class MidnightDIDSimulator {
     return this.getLedger();
   }
 
-  public addRelation(relation: VerificationMethodRelation, methodId: string): Ledger {
-    this.circuitContext = this.contract.impureCircuits.addVerificationMethodRelation(
-      this.circuitContext,
-      relation, 
-      methodId
-    ).context;
+  public addRelation(
+    relation: VerificationMethodRelation,
+    methodId: string
+  ): Ledger {
+    this.circuitContext =
+      this.contract.impureCircuits.addVerificationMethodRelation(
+        this.circuitContext,
+        relation,
+        methodId
+      ).context;
     return this.getLedger();
   }
 
-  public removeRelation(relation: VerificationMethodRelation, methodId: string): Ledger {
-    this.circuitContext = this.contract.impureCircuits.removeVerificationMethodRelation(
-      this.circuitContext,
-      relation, 
-      methodId
-    ).context;
+  public removeRelation(
+    relation: VerificationMethodRelation,
+    methodId: string
+  ): Ledger {
+    this.circuitContext =
+      this.contract.impureCircuits.removeVerificationMethodRelation(
+        this.circuitContext,
+        relation,
+        methodId
+      ).context;
     return this.getLedger();
   }
 

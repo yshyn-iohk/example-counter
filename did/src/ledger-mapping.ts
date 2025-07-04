@@ -1,8 +1,9 @@
 import {
   Ledger,
-  VerificationMethodType as LedgerVerificationMethodType
+  VerificationMethodType as LedgerVerificationMethodType,
+  VerificationMethodRelation as LedgerVerificationMethodRelation
 } from "./managed/did/contract/index.cjs";
-import { VerificationMethodType } from "./did-document";
+import { VerificationMethodType, VerificationMethodRelationType } from "./did-document";
 import {
   bytesToPublicKeyMultibase,
   createDIDDocument,
@@ -20,6 +21,17 @@ export class LedgerToDIDDocument {
       VerificationMethodType.Ed25519VerificationKey2020,
     [LedgerVerificationMethodType.RedJubJubVerificationKey2025]:
       VerificationMethodType.RedJubJubVerificationKey2025
+  };
+
+  static readonly VerificationMethodRelationMap: Record<
+    LedgerVerificationMethodRelation,
+    VerificationMethodRelationType
+  > = {
+    [LedgerVerificationMethodRelation.Authentication]: VerificationMethodRelationType.Authentication,
+    [LedgerVerificationMethodRelation.AssertionMethod]: VerificationMethodRelationType.AssertionMethod,
+    [LedgerVerificationMethodRelation.KeyAgreement]: VerificationMethodRelationType.KeyAgreement,
+    [LedgerVerificationMethodRelation.CapabilityInvocation]: VerificationMethodRelationType.CapabilityInvocation,
+    [LedgerVerificationMethodRelation.CapabilityDelegation]: VerificationMethodRelationType.CapabilityDelegation
   };
 
   /**
@@ -95,5 +107,16 @@ export class DIDDocumentToLedger {
       LedgerVerificationMethodType.Ed25519VerificationKey2020,
     [VerificationMethodType.RedJubJubVerificationKey2025]:
       LedgerVerificationMethodType.RedJubJubVerificationKey2025
+  };
+
+  static readonly VerificationMethodRelationMap: Record<
+    VerificationMethodRelationType,
+    LedgerVerificationMethodRelation
+  > = {
+    [VerificationMethodRelationType.Authentication]: LedgerVerificationMethodRelation.Authentication,
+    [VerificationMethodRelationType.AssertionMethod]: LedgerVerificationMethodRelation.AssertionMethod,
+    [VerificationMethodRelationType.KeyAgreement]: LedgerVerificationMethodRelation.KeyAgreement,
+    [VerificationMethodRelationType.CapabilityInvocation]: LedgerVerificationMethodRelation.CapabilityInvocation,
+    [VerificationMethodRelationType.CapabilityDelegation]: LedgerVerificationMethodRelation.CapabilityDelegation
   };
 }

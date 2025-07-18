@@ -210,6 +210,18 @@ export function publicKeyMultibaseToHex(multibase: PublicKeyMultibase): string {
 }
 
 /**
+ * Converts a PublicKeyMultibase (base16, starting with 'f') to a Uint8Array.
+ * @param multibase - PublicKeyMultibase string.
+ * @returns Uint8Array of the decoded public key bytes.
+ */
+export function publicKeyMultibaseToBytes(multibase: PublicKeyMultibase): Uint8Array {
+  if (!multibase.startsWith("f")) {
+    throw new Error('Unsupported multibase, expected "f" (base16)');
+  }
+  return Uint8Array.from(Buffer.from(multibase.slice(1), "hex"));
+}
+
+/**
  * Converts a Uint8Array (or ArrayBufferLike) to a PublicKeyMultibase string using base16 (prepend 'f').
  * @param bytes - Uint8Array or ArrayBufferLike representing the public key.
  * @returns PublicKeyMultibase string.

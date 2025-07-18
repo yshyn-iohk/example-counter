@@ -1,14 +1,20 @@
 import {
   Ledger,
   VerificationMethodType as LedgerVerificationMethodType,
-  VerificationMethodRelation as LedgerVerificationMethodRelation
+  VerificationMethodRelation as LedgerVerificationMethodRelation,
+  VerificationMethod as LedgerVerificationMethod
 } from "./managed/did/contract/index.cjs";
-import { VerificationMethodType, VerificationMethodRelationType } from "./did-document";
+import {
+  VerificationMethodType,
+  VerificationMethodRelationType
+} from "./did-document";
 import {
   bytesToPublicKeyMultibase,
   createDIDDocument,
   createVerificationMethod,
-  DIDDocument
+  DIDDocument,
+  VerificationMethod,
+  publicKeyMultibaseToBytes
 } from "./did-document";
 import { MidnightNetwork, createMidnightDID } from "./midnight-did";
 
@@ -27,11 +33,16 @@ export class LedgerToDIDDocument {
     LedgerVerificationMethodRelation,
     VerificationMethodRelationType
   > = {
-    [LedgerVerificationMethodRelation.Authentication]: VerificationMethodRelationType.Authentication,
-    [LedgerVerificationMethodRelation.AssertionMethod]: VerificationMethodRelationType.AssertionMethod,
-    [LedgerVerificationMethodRelation.KeyAgreement]: VerificationMethodRelationType.KeyAgreement,
-    [LedgerVerificationMethodRelation.CapabilityInvocation]: VerificationMethodRelationType.CapabilityInvocation,
-    [LedgerVerificationMethodRelation.CapabilityDelegation]: VerificationMethodRelationType.CapabilityDelegation
+    [LedgerVerificationMethodRelation.Authentication]:
+      VerificationMethodRelationType.Authentication,
+    [LedgerVerificationMethodRelation.AssertionMethod]:
+      VerificationMethodRelationType.AssertionMethod,
+    [LedgerVerificationMethodRelation.KeyAgreement]:
+      VerificationMethodRelationType.KeyAgreement,
+    [LedgerVerificationMethodRelation.CapabilityInvocation]:
+      VerificationMethodRelationType.CapabilityInvocation,
+    [LedgerVerificationMethodRelation.CapabilityDelegation]:
+      VerificationMethodRelationType.CapabilityDelegation
   };
 
   /**
@@ -98,6 +109,7 @@ export class LedgerToDIDDocument {
   }
 }
 
+// TODO: rename DomainToLedger
 export class DIDDocumentToLedger {
   static readonly VerificationMethodTypeMap: Record<
     VerificationMethodType,
@@ -113,10 +125,23 @@ export class DIDDocumentToLedger {
     VerificationMethodRelationType,
     LedgerVerificationMethodRelation
   > = {
-    [VerificationMethodRelationType.Authentication]: LedgerVerificationMethodRelation.Authentication,
-    [VerificationMethodRelationType.AssertionMethod]: LedgerVerificationMethodRelation.AssertionMethod,
-    [VerificationMethodRelationType.KeyAgreement]: LedgerVerificationMethodRelation.KeyAgreement,
-    [VerificationMethodRelationType.CapabilityInvocation]: LedgerVerificationMethodRelation.CapabilityInvocation,
-    [VerificationMethodRelationType.CapabilityDelegation]: LedgerVerificationMethodRelation.CapabilityDelegation
+    [VerificationMethodRelationType.Authentication]:
+      LedgerVerificationMethodRelation.Authentication,
+    [VerificationMethodRelationType.AssertionMethod]:
+      LedgerVerificationMethodRelation.AssertionMethod,
+    [VerificationMethodRelationType.KeyAgreement]:
+      LedgerVerificationMethodRelation.KeyAgreement,
+    [VerificationMethodRelationType.CapabilityInvocation]:
+      LedgerVerificationMethodRelation.CapabilityInvocation,
+    [VerificationMethodRelationType.CapabilityDelegation]:
+      LedgerVerificationMethodRelation.CapabilityDelegation
   };
+
+  static verificationMethod(method: VerificationMethod): LedgerVerificationMethod {
+    return {
+      id: method.id,
+      type: this.VerificationMethodTypeMap[method.type],
+      publicKey: publicKeyMultibaseToBytes(method.publicKeyMultibase)
+    };
+  }
 }

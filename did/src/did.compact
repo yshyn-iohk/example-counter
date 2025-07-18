@@ -2,7 +2,7 @@
 // Copyright (C) 2025 Midnight Foundation
 // SPDX-License-Identifier: Apache-2.0
 // Licensed under the Apache License, Version 2.0 (the "License");
-// You may not use this file except in compliance with the License.
+// you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
 // http://www.apache.org/licenses/LICENSE-2.0
@@ -26,6 +26,7 @@ export ledger assertionMethodRelation: Set<Opaque<"string">>;
 export ledger keyAgreementRelation: Set<Opaque<"string">>;
 export ledger capabilityInvocationRelation: Set<Opaque<"string">>;
 export ledger capabilityDelegationRelation: Set<Opaque<"string">>;
+export ledger services: Map<Opaque<"string">, Service>;
 
 witness local_secret_key(): Bytes<32>;
 
@@ -48,13 +49,125 @@ export struct VerificationMethod {
   publicKey: Bytes<32>,
 };
 
-constructor() {
-  id = kernel.self();
-  active = true;
+export struct Service {
+  id: Opaque<"string">,
+  type: Opaque<"string">,
+  serviceEndpoint: Vector<4, Opaque<"string">>,
 }
 
-export circuit addVerificationMethod(verificationMethod: VerificationMethod): [] {
-  assert(active, "Contract is not active");
+export enum OperationType {
+  Empty, // is required to have the default values for the tagged structure and fixed size Vector
+  AddVerificationMethod,
+  UpdateVerificationMethod,
+  RemoveVerificationMethod,
+  AddVerificationMethodRelation,
+  RemoveVerificationMethodRelation,
+  AddService,
+  UpdateService,
+  RemoveService,
+  Deactivate
+}
+
+export struct AddVerificationMethodOptions {
+  verificationMethod: VerificationMethod,
+}
+
+export struct UpdateVerificationMethodOptions {
+  verificationMethod: VerificationMethod,
+}
+
+export struct RemoveVerificationMethodOptions {
+  id: Opaque<"string">,
+}
+
+export struct AddVerificationMethodRelationOptions {
+  relation: VerificationMethodRelation,
+  methodId: Opaque<"string">,
+}
+
+export struct RemoveVerificationMethodRelationOptions {
+  relation: VerificationMethodRelation,
+  methodId: Opaque<"string">,
+}
+
+export struct AddServiceOptions {
+  id: Opaque<"string">,
+  type: Opaque<"string">,
+  serviceEndpoint: Vector<4, Opaque<"string">>,
+}
+
+export struct UpdateServiceOptions {
+  id: Opaque<"string">,
+  type: Opaque<"string">,
+  serviceEndpoint: Vector<4, Opaque<"string">>,
+}
+
+export struct RemoveServiceOptions {
+  id: Opaque<"string">,
+}
+
+export struct DIDUpdateOperation {
+  operationType: OperationType,
+  addVerificationMethodOptions: AddVerificationMethodOptions,
+  updateVerificationMethodOptions: UpdateVerificationMethodOptions,
+  removeVerificationMethodOptions: RemoveVerificationMethodOptions,
+  addVerificationMethodRelationOptions: AddVerificationMethodRelationOptions,
+  removeVerificationMethodRelationOptions: RemoveVerificationMethodRelationOptions,
+  addServiceOptions: AddServiceOptions,
+  updateServiceOptions: UpdateServiceOptions,
+  removeServiceOptions: RemoveServiceOptions,
+}
+
+constructor(operations: Vector<32, DIDUpdateOperation>) {
+  id = kernel.self();
+  active = true;
+
+  applyOperations(operations);
+}
+
+export circuit applyOperations(operations: Vector<32, DIDUpdateOperation>): [] {
+  assert(disclose(active), "Contract is not active");
+
+  for (const operation of operations)
+    applyOperation(disclose(operation));
+  
+  version.increment(1);
+}
+
+circuit applyOperation(operation: DIDUpdateOperation): [] {
+  if (operation.operationType == OperationType.AddVerificationMethod) {
+    addVerificationMethod(
+      operation.addVerificationMethodOptions.verificationMethod
+      );
+  } else if (operation.operationType == OperationType.UpdateVerificationMethod) {
+    updateVerificationMethod(
+      operation.updateVerificationMethodOptions.verificationMethod
+      );
+  } else if (operation.operationType == OperationType.RemoveVerificationMethod) {
+    removeVerificationMethod(
+      operation.removeVerificationMethodOptions.id
+    );
+  } else if (operation.operationType == OperationType.AddVerificationMethodRelation) {
+    addVerificationMethodRelation(
+      operation.addVerificationMethodRelationOptions
+    );
+  } else if (operation.operationType == OperationType.RemoveVerificationMethodRelation) {
+    removeVerificationMethodRelation(operation.removeVerificationMethodRelationOptions);
+  } else if (operation.operationType == OperationType.AddService) {
+    addService(operation.addServiceOptions);
+  } else if (operation.operationType == OperationType.UpdateService) {
+    updateService(operation.updateServiceOptions);
+  } else if (operation.operationType == OperationType.RemoveService) {
+    removeService(operation.removeServiceOptions);
+  } else if (operation.operationType == OperationType.Deactivate) {
+    deactivate();
+  } else {
+    // no-op for OperationType.Empty
+  }
+}
+
+circuit addVerificationMethod(verificationMethod: VerificationMethod): [] {
+  assert(disclose(active), "Contract is not active");
   
   const disclosedVerificationMethod = disclose(verificationMethod);
   assert(!verificationMethods.member(disclosedVerificationMethod.id), "Verification method already exists");
@@ -63,7 +176,7 @@ export circuit addVerificationMethod(verificationMethod: VerificationMethod): []
   version.increment(1);
 }
 
-export circuit updateVerificationMethod(verificationMethod: VerificationMethod): [] {
+circuit updateVerificationMethod(verificationMethod: VerificationMethod): [] {
   assert(active, "Contract is not active");
   
   const disclosedVerificationMethod = disclose(verificationMethod);
@@ -74,7 +187,7 @@ export circuit updateVerificationMethod(verificationMethod: VerificationMethod):
   version.increment(1);
 }
 
-export circuit removeVerificationMethod(id: Opaque<"string">): [] {
+circuit removeVerificationMethod(id: Opaque<"string">): [] {
   assert(active, "Contract is not active");
 
   assert(verificationMethods.member(disclose(id)), "Verification method does not exist");
@@ -83,65 +196,71 @@ export circuit removeVerificationMethod(id: Opaque<"string">): [] {
   version.increment(1);
 }
 
-export circuit addVerificationMethodRelation(
-  relation: VerificationMethodRelation,
-  methodId: Opaque<"string">
+circuit addVerificationMethodRelation(
+  options: AddVerificationMethodRelationOptions
 ): [] {
   assert(active, "Contract is not active");
 
-  const disclosedRelation = disclose(relation);
-  const disclosedMethodId = disclose(methodId);
-  assert(verificationMethods.member(disclosedMethodId), "Verification method does not exist");
+  const relation = options.relation;
+  const methodId = options.methodId;
+  assert(verificationMethods.member(methodId), "Verification method does not exist");
 
-  if (disclosedRelation == VerificationMethodRelation.Authentication) {
-    assert(!authenticationRelation.member(disclosedMethodId), "Method already in 'authentication' relation");
-    authenticationRelation.insert(disclosedMethodId);
-  } else if (disclosedRelation == VerificationMethodRelation.AssertionMethod) {
-    assert(!assertionMethodRelation.member(disclosedMethodId), "Method already in 'assertion' method relation");
-    assertionMethodRelation.insert(disclosedMethodId);
-  } else if (disclosedRelation == VerificationMethodRelation.KeyAgreement) {
-    assert(!keyAgreementRelation.member(disclosedMethodId), "Method already in 'key agreement' relation");
-    keyAgreementRelation.insert(disclosedMethodId);
-  } else if (disclosedRelation == VerificationMethodRelation.CapabilityInvocation) {
-    assert(!capabilityInvocationRelation.member(disclosedMethodId), "Method already in 'capability invocation' relation");
-    capabilityInvocationRelation.insert(disclosedMethodId);
-  } else if (disclosedRelation == VerificationMethodRelation.CapabilityDelegation) {
-    assert(!capabilityDelegationRelation.member(disclosedMethodId), "Method already in 'capability delegation' relation");
-    capabilityDelegationRelation.insert(disclosedMethodId);
+  if (relation == VerificationMethodRelation.Authentication) {
+    assert(!authenticationRelation.member(methodId), "Method already in 'authentication' relation");
+    authenticationRelation.insert(methodId);
+  } else if (relation == VerificationMethodRelation.AssertionMethod) {
+    assert(!assertionMethodRelation.member(methodId), "Method already in 'assertion' method relation");
+    assertionMethodRelation.insert(methodId);
+  } else if (relation == VerificationMethodRelation.KeyAgreement) {
+    assert(!keyAgreementRelation.member(methodId), "Method already in 'key agreement' relation");
+    keyAgreementRelation.insert(methodId);
+  } else if (relation == VerificationMethodRelation.CapabilityInvocation) {
+    assert(!capabilityInvocationRelation.member(methodId), "Method already in 'capability invocation' relation");
+    capabilityInvocationRelation.insert(methodId);
+  } else if (relation == VerificationMethodRelation.CapabilityDelegation) {
+    assert(!capabilityDelegationRelation.member(methodId), "Method already in 'capability delegation' relation");
+    capabilityDelegationRelation.insert(methodId);
   }
-
-  version.increment(1);
 }
 
-export circuit removeVerificationMethodRelation(
-  relation: VerificationMethodRelation,
-  methodId: Opaque<"string">
+circuit removeVerificationMethodRelation(
+  options: RemoveVerificationMethodRelationOptions
 ): [] {
   assert(active, "Contract is not active");
 
-  const disclosedMethodId = disclose(methodId);
-  const disclosedRelation = disclose(relation);
+  const methodId = options.methodId;
+  const relation = options.relation;
 
-  assert(verificationMethods.member(disclosedMethodId), "Verification method does not exist");
+  assert(verificationMethods.member(methodId), "Verification method does not exist");
 
-  if (disclosedRelation == VerificationMethodRelation.Authentication) {
-    assert(authenticationRelation.member(disclosedMethodId), "Method not in 'authentication' relation");
-    authenticationRelation.remove(disclosedMethodId);
-  } else if (disclosedRelation == VerificationMethodRelation.AssertionMethod) {
-    assert(assertionMethodRelation.member(disclosedMethodId), "Method not in 'assertion' method relation");
-    assertionMethodRelation.remove(disclosedMethodId);
-  } else if (disclosedRelation == VerificationMethodRelation.KeyAgreement) {
-    assert(keyAgreementRelation.member(disclosedMethodId), "Method not in 'key agreement' relation");
-    keyAgreementRelation.remove(disclosedMethodId);
-  } else if (disclosedRelation == VerificationMethodRelation.CapabilityInvocation) {
-    assert(capabilityInvocationRelation.member(disclosedMethodId), "Method not in 'capability invocation' relation");
-    capabilityInvocationRelation.remove(disclosedMethodId);
-  } else if (disclosedRelation == VerificationMethodRelation.CapabilityDelegation) {
-    assert(capabilityDelegationRelation.member(disclosedMethodId), "Method not in 'capability delegation' relation");
-    capabilityDelegationRelation.remove(disclosedMethodId);
+  if (relation == VerificationMethodRelation.Authentication) {
+    assert(authenticationRelation.member(methodId), "Method not in 'authentication' relation");
+    authenticationRelation.remove(methodId);
+  } else if (relation == VerificationMethodRelation.AssertionMethod) {
+    assert(assertionMethodRelation.member(methodId), "Method not in 'assertion' method relation");
+    assertionMethodRelation.remove(methodId);
+  } else if (relation == VerificationMethodRelation.KeyAgreement) {
+    assert(keyAgreementRelation.member(methodId), "Method not in 'key agreement' relation");
+    keyAgreementRelation.remove(methodId);
+  } else if (relation == VerificationMethodRelation.CapabilityInvocation) {
+    assert(capabilityInvocationRelation.member(methodId), "Method not in 'capability invocation' relation");
+    capabilityInvocationRelation.remove(methodId);
+  } else if (relation == VerificationMethodRelation.CapabilityDelegation) {
+    assert(capabilityDelegationRelation.member(methodId), "Method not in 'capability delegation' relation");
+    capabilityDelegationRelation.remove(methodId);
   }
+}
 
-  version.increment(1);
+circuit addService(options: AddServiceOptions): [] {
+
+}
+
+circuit updateService(options: UpdateServiceOptions): [] {
+
+}
+
+circuit removeService(options: RemoveServiceOptions): [] {
+
 }
 
 export circuit deactivate(): [] {
@@ -149,4 +268,3 @@ export circuit deactivate(): [] {
   active = false;
   version.increment(1);
 }
-

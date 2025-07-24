@@ -55,6 +55,13 @@ export class OperationBuilder {
         }
     };
 
+    static undefined(): DIDUpdateOperation {
+        return {
+            ...this.defaultDIDUpdateOperation,
+            operationType: OperationType.Undefined,
+        }
+    }
+
     static addVerificationMethod(options: AddVerificationMethodOptions): DIDUpdateOperation {
         return {
             ...this.defaultDIDUpdateOperation,
@@ -125,4 +132,15 @@ export class OperationBuilder {
             operationType: OperationType.Deactivate,
         };
     }
+
+    static padding(operations: DIDUpdateOperation[]): DIDUpdateOperation[] {
+        const MAX_OPERATIONS = 32;
+        if (operations.length > MAX_OPERATIONS) {
+            throw new Error(`Cannot pad: input exceeds ${MAX_OPERATIONS} operations`);
+        }
+        return operations.concat(
+            Array.from({ length: MAX_OPERATIONS - operations.length }, () => this.undefined())
+        );
+    }
+    
 }

@@ -15,6 +15,8 @@ export enum DIDOperationType {
   RemoveVerificationMethod = "RemoveVerificationMethod",
   AddVerificationMethodRelation = "AddVerificationMethodRelation",
   RemoveVerificationMethodRelation = "RemoveVerificationMethodRelation",
+  //TODO: add AddService
+  //TODO: add RemoveService
   Deactivate = "Deactivate"
 }
 

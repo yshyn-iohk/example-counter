@@ -11,8 +11,14 @@ import {
   ledger,
   VerificationMethodRelation,
   VerificationMethodType,
-  VerificationMethod
+  VerificationMethod,
+  DIDUpdateOperation,
+  OperationType
 } from "../managed/did/contract/index.cjs";
+
+import { OperationBuilder } from "../ledger-operation-builder";
+
+import { DIDDocumentToLedger } from "../ledger-mapping"
 
 import { type MidnightDIDPrivateState, witnesses } from "../witnesses.js";
 
@@ -20,13 +26,19 @@ export class MidnightDIDSimulator {
   readonly contract: Contract<MidnightDIDPrivateState>;
   circuitContext: CircuitContext<MidnightDIDPrivateState>;
 
-  constructor() {
+  constructor(operations: Array<DIDUpdateOperation> = []) {
+    if (operations.length > 32) {
+      throw new Error("Maximum number of DID operations exceeded: 32");
+    }
     this.contract = new Contract<MidnightDIDPrivateState>(witnesses);
     const {
       currentPrivateState,
       currentContractState,
       currentZswapLocalState
-    } = this.contract.initialState(constructorContext({}, "0".repeat(64)));
+    } = this.contract.initialState(
+      constructorContext({}, "0".repeat(64)),
+      operations.length > 0 ? operations : new Array(32).fill(DIDDocumentToLedger.defaultLedgerUpdateOperation)
+    );
     this.circuitContext = {
       currentPrivateState,
       currentZswapLocalState,
@@ -46,61 +58,15 @@ export class MidnightDIDSimulator {
     return this.circuitContext.currentPrivateState;
   }
 
-  public addVerificationMethod(verificationMethod: VerificationMethod): Ledger {
-    this.circuitContext = this.contract.impureCircuits.addVerificationMethod(
+  public applyOperation(operation: DIDUpdateOperation): Ledger {
+    return this.applyOperations(Array.of(operation));
+  }
+
+  public applyOperations(operations: Array<DIDUpdateOperation>): Ledger {
+    const ledgerOperations = OperationBuilder.padding(operations);
+    this.circuitContext = this.contract.impureCircuits.applyOperations(
       this.circuitContext,
-      verificationMethod
-    ).context;
-    return this.getLedger();
-  }
-
-  public updateVerificationMethod(
-    verificationMethod: VerificationMethod
-  ): Ledger {
-    this.circuitContext = this.contract.impureCircuits.updateVerificationMethod(
-      this.circuitContext,
-      verificationMethod
-    ).context;
-    return this.getLedger();
-  }
-
-  public removeVerificationMethod(methodId: string): Ledger {
-    this.circuitContext = this.contract.impureCircuits.removeVerificationMethod(
-      this.circuitContext,
-      methodId
-    ).context;
-    return this.getLedger();
-  }
-
-  public addRelation(
-    relation: VerificationMethodRelation,
-    methodId: string
-  ): Ledger {
-    this.circuitContext =
-      this.contract.impureCircuits.addVerificationMethodRelation(
-        this.circuitContext,
-        relation,
-        methodId
-      ).context;
-    return this.getLedger();
-  }
-
-  public removeRelation(
-    relation: VerificationMethodRelation,
-    methodId: string
-  ): Ledger {
-    this.circuitContext =
-      this.contract.impureCircuits.removeVerificationMethodRelation(
-        this.circuitContext,
-        relation,
-        methodId
-      ).context;
-    return this.getLedger();
-  }
-
-  public deactivate(): Ledger {
-    this.circuitContext = this.contract.impureCircuits.deactivate(
-      this.circuitContext
+      ledgerOperations
     ).context;
     return this.getLedger();
   }

@@ -38,6 +38,7 @@ export type PublicKeyMultibase = z.infer<typeof PublicKeyMultibaseSchema>;
 
 /** Verification Method Types */
 export enum VerificationMethodType {
+  Undefined = "Undefined",
   Ed25519VerificationKey2020 = "Ed25519VerificationKey2020",
   RedJubJubVerificationKey2025 = "RedJubJubVerificationKey2025"
 }
@@ -54,6 +55,7 @@ export type VerificationMethod = z.infer<typeof VerificationMethodSchema>;
 
 /** Verification Method Relation */
 export enum VerificationMethodRelationType {
+  Undefined = "Undefined",
   Authentication = "Authentication",
   AssertionMethod = "AssertionMethod",
   KeyAgreement = "KeyAgreement",

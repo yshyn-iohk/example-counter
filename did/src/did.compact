@@ -20,6 +20,7 @@ import CompactStandardLibrary;
 export ledger id: ContractAddress;
 export ledger version: Counter;
 export ledger active: Boolean;
+export ledger operationCount: Counter;
 export ledger verificationMethods: Map<Opaque<"string">, VerificationMethod>;
 export ledger authenticationRelation: Set<Opaque<"string">>;
 export ledger assertionMethodRelation: Set<Opaque<"string">>;
@@ -31,11 +32,13 @@ export ledger services: Map<Opaque<"string">, Service>;
 witness local_secret_key(): Bytes<32>;
 
 export enum VerificationMethodType {
+  Undefined,
   Ed25519VerificationKey2020,
   RedJubJubVerificationKey2025
 }
 
 export enum VerificationMethodRelation {
+  Undefined,
   Authentication,
   AssertionMethod,
   KeyAgreement,
@@ -56,7 +59,7 @@ export struct Service {
 }
 
 export enum OperationType {
-  Empty, // is required to have the default values for the tagged structure and fixed size Vector
+  Undefined, // is required to have the default values for the tagged structure and fixed size Vector
   AddVerificationMethod,
   UpdateVerificationMethod,
   RemoveVerificationMethod,
@@ -128,10 +131,17 @@ constructor(operations: Vector<32, DIDUpdateOperation>) {
 export circuit applyOperations(operations: Vector<32, DIDUpdateOperation>): [] {
   assert(disclose(active), "Contract is not active");
 
+  const previosOperationCount = operationCount.read();
+
   for (const operation of operations)
-    applyOperation(disclose(operation));
+    if (disclose(operation.operationType) != OperationType.Undefined) {
+      applyOperation(disclose(operation));
+      operationCount.increment(1);
+    }
   
-  version.increment(1);
+  const appliedOperationCount = operationCount.read() - previosOperationCount;
+  if (appliedOperationCount > 0)
+    version.increment(1);
 }
 
 circuit applyOperation(operation: DIDUpdateOperation): [] {
@@ -173,7 +183,6 @@ circuit addVerificationMethod(verificationMethod: VerificationMethod): [] {
   assert(!verificationMethods.member(disclosedVerificationMethod.id), "Verification method already exists");
 
   verificationMethods.insert(disclosedVerificationMethod.id, disclosedVerificationMethod);
-  version.increment(1);
 }
 
 circuit updateVerificationMethod(verificationMethod: VerificationMethod): [] {
@@ -184,7 +193,6 @@ circuit updateVerificationMethod(verificationMethod: VerificationMethod): [] {
 
   verificationMethods.remove(disclosedVerificationMethod.id);
   verificationMethods.insert(disclosedVerificationMethod.id, disclosedVerificationMethod);
-  version.increment(1);
 }
 
 circuit removeVerificationMethod(id: Opaque<"string">): [] {
@@ -193,7 +201,6 @@ circuit removeVerificationMethod(id: Opaque<"string">): [] {
   assert(verificationMethods.member(disclose(id)), "Verification method does not exist");
 
   verificationMethods.remove(disclose(id));
-  version.increment(1);
 }
 
 circuit addVerificationMethodRelation(

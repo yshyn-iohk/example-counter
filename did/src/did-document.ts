@@ -216,7 +216,9 @@ export function publicKeyMultibaseToHex(multibase: PublicKeyMultibase): string {
  * @param multibase - PublicKeyMultibase string.
  * @returns Uint8Array of the decoded public key bytes.
  */
-export function publicKeyMultibaseToBytes(multibase: PublicKeyMultibase): Uint8Array {
+export function publicKeyMultibaseToBytes(
+  multibase: PublicKeyMultibase
+): Uint8Array {
   if (!multibase.startsWith("f")) {
     throw new Error('Unsupported multibase, expected "f" (base16)');
   }

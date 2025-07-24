@@ -4,7 +4,7 @@ import {
   VerificationMethodRelation as LedgerVerificationMethodRelation,
   VerificationMethod as LedgerVerificationMethod,
   DIDUpdateOperation as LedgerUpdateOperation,
-  OperationType as LedgerOperationType,
+  OperationType as LedgerOperationType
 } from "./managed/did/contract/index.cjs";
 import {
   VerificationMethodType,
@@ -16,7 +16,7 @@ import {
   createVerificationMethod,
   DIDDocument,
   VerificationMethod,
-  publicKeyMultibaseToBytes,
+  publicKeyMultibaseToBytes
 } from "./did-document";
 import { MidnightNetwork, createMidnightDID } from "./midnight-did";
 import { DIDOperation, DIDOperationType } from "./did-operations";
@@ -27,8 +27,7 @@ export class LedgerToDIDDocument {
     LedgerVerificationMethodType,
     VerificationMethodType
   > = {
-    [LedgerVerificationMethodType.Undefined]:
-      VerificationMethodType.Undefined,
+    [LedgerVerificationMethodType.Undefined]: VerificationMethodType.Undefined,
     [LedgerVerificationMethodType.Ed25519VerificationKey2020]:
       VerificationMethodType.Ed25519VerificationKey2020,
     [LedgerVerificationMethodType.RedJubJubVerificationKey2025]:
@@ -123,8 +122,7 @@ export class DIDDocumentToLedger {
     VerificationMethodType,
     LedgerVerificationMethodType
   > = {
-    [VerificationMethodType.Undefined]:
-      LedgerVerificationMethodType.Undefined,
+    [VerificationMethodType.Undefined]: LedgerVerificationMethodType.Undefined,
     [VerificationMethodType.Ed25519VerificationKey2020]:
       LedgerVerificationMethodType.Ed25519VerificationKey2020,
     [VerificationMethodType.RedJubJubVerificationKey2025]:
@@ -149,7 +147,9 @@ export class DIDDocumentToLedger {
       LedgerVerificationMethodRelation.CapabilityDelegation
   };
 
-  static verificationMethod(method: VerificationMethod): LedgerVerificationMethod {
+  static verificationMethod(
+    method: VerificationMethod
+  ): LedgerVerificationMethod {
     return {
       id: method.id,
       type: this.VerificationMethodTypeMap[method.type],
@@ -157,108 +157,119 @@ export class DIDDocumentToLedger {
     };
   }
 
-  static readonly OperationMap: Record<
-    DIDOperationType,
-    LedgerOperationType
-  > = {
-    [DIDOperationType.AddVerificationMethod]:LedgerOperationType.AddVerificationMethod,
-    [DIDOperationType.UpdateVerificationMethod]:LedgerOperationType.UpdateVerificationMethod,
-    [DIDOperationType.RemoveVerificationMethod]:LedgerOperationType.RemoveVerificationMethod,
-    [DIDOperationType.AddVerificationMethodRelation]:LedgerOperationType.AddVerificationMethodRelation,
-    [DIDOperationType.RemoveVerificationMethodRelation]:LedgerOperationType.RemoveVerificationMethodRelation,
-    [DIDOperationType.Deactivate]:LedgerOperationType.Deactivate
-  };
+  static readonly OperationMap: Record<DIDOperationType, LedgerOperationType> =
+    {
+      [DIDOperationType.AddVerificationMethod]:
+        LedgerOperationType.AddVerificationMethod,
+      [DIDOperationType.UpdateVerificationMethod]:
+        LedgerOperationType.UpdateVerificationMethod,
+      [DIDOperationType.RemoveVerificationMethod]:
+        LedgerOperationType.RemoveVerificationMethod,
+      [DIDOperationType.AddVerificationMethodRelation]:
+        LedgerOperationType.AddVerificationMethodRelation,
+      [DIDOperationType.RemoveVerificationMethodRelation]:
+        LedgerOperationType.RemoveVerificationMethodRelation,
+      [DIDOperationType.Deactivate]: LedgerOperationType.Deactivate
+    };
 
   static undefinedVerificationMethod: LedgerVerificationMethod = {
-        id: "",
-        type: LedgerVerificationMethodType.Undefined,
-        publicKey: new Uint8Array(0), 
+    id: "",
+    type: LedgerVerificationMethodType.Undefined,
+    publicKey: new Uint8Array(0)
   };
-  
 
   //TODO: clarify with Midnight team how to init the default struct
-  static defaultLedgerUpdateOperation: LedgerUpdateOperation = 
-    {
-        operationType: LedgerOperationType.Undefined,
-        addVerificationMethodOptions:  { 
-            verificationMethod: this.undefinedVerificationMethod,
-        },
-        updateVerificationMethodOptions: {
-            verificationMethod: this.undefinedVerificationMethod,
-        },
-        removeVerificationMethodOptions: {
-            id: "",
-        },
-        addVerificationMethodRelationOptions: {
-            relation: LedgerVerificationMethodRelation.Undefined,
-            methodId: "",
-        },
-        removeVerificationMethodRelationOptions: {
-            relation: LedgerVerificationMethodRelation.Undefined,
-            methodId: "",
-        },
-        addServiceOptions: {
-            id: "",
-            type: "",
-            serviceEndpoint: Array.of("", "", "", "",),
-        },
-        updateServiceOptions: {
-            id: "",
-            type: "",
-            serviceEndpoint: Array.of("", "", "", "",),
-        },
-        removeServiceOptions: {
-            id: "",
-        }
+  static defaultLedgerUpdateOperation: LedgerUpdateOperation = {
+    operationType: LedgerOperationType.Undefined,
+    addVerificationMethodOptions: {
+      verificationMethod: this.undefinedVerificationMethod
+    },
+    updateVerificationMethodOptions: {
+      verificationMethod: this.undefinedVerificationMethod
+    },
+    removeVerificationMethodOptions: {
+      id: ""
+    },
+    addVerificationMethodRelationOptions: {
+      relation: LedgerVerificationMethodRelation.Undefined,
+      methodId: ""
+    },
+    removeVerificationMethodRelationOptions: {
+      relation: LedgerVerificationMethodRelation.Undefined,
+      methodId: ""
+    },
+    addServiceOptions: {
+      id: "",
+      type: "",
+      serviceEndpoint: Array.of("", "", "", "")
+    },
+    updateServiceOptions: {
+      id: "",
+      type: "",
+      serviceEndpoint: Array.of("", "", "", "")
+    },
+    removeServiceOptions: {
+      id: ""
+    }
   };
 
   static updateOperation(updateOperation: DIDOperation): LedgerUpdateOperation {
     const { type } = updateOperation;
-    let ledgerUpdateOperation = this.defaultLedgerUpdateOperation
+    let ledgerUpdateOperation = this.defaultLedgerUpdateOperation;
     ledgerUpdateOperation.operationType = this.OperationMap[type];
 
     switch (type) {
       case DIDOperationType.AddVerificationMethod:
         ledgerUpdateOperation.addVerificationMethodOptions = {
-            verificationMethod: this.verificationMethod(updateOperation.verificationMethod)
-          };
+          verificationMethod: this.verificationMethod(
+            updateOperation.verificationMethod
+          )
+        };
         return ledgerUpdateOperation;
       case DIDOperationType.UpdateVerificationMethod:
         ledgerUpdateOperation.updateVerificationMethodOptions = {
-            verificationMethod: this.verificationMethod(updateOperation.verificationMethod)
+          verificationMethod: this.verificationMethod(
+            updateOperation.verificationMethod
+          )
         };
         return ledgerUpdateOperation;
       case DIDOperationType.RemoveVerificationMethod:
         ledgerUpdateOperation.removeVerificationMethodOptions = {
-            id: updateOperation.id,
-          };
+          id: updateOperation.id
+        };
         return ledgerUpdateOperation;
       case DIDOperationType.AddVerificationMethodRelation:
         ledgerUpdateOperation.addVerificationMethodRelationOptions = {
-            methodId: updateOperation.methodId,
-            relation: this.VerificationMethodRelationMap[updateOperation.relation],
-          };
+          methodId: updateOperation.methodId,
+          relation: this.VerificationMethodRelationMap[updateOperation.relation]
+        };
         return ledgerUpdateOperation;
       case DIDOperationType.RemoveVerificationMethodRelation:
         ledgerUpdateOperation.removeVerificationMethodRelationOptions = {
-            methodId: updateOperation.methodId,
-            relation: this.VerificationMethodRelationMap[updateOperation.relation],
-          };
+          methodId: updateOperation.methodId,
+          relation: this.VerificationMethodRelationMap[updateOperation.relation]
+        };
         return ledgerUpdateOperation;
       case DIDOperationType.Deactivate:
         return ledgerUpdateOperation;
       default:
         throw new Error(`Unsupported operation type: ${type}`);
     }
-  };
+  }
 
-  static updateOperations(operations: Array<DIDOperation>): Array<LedgerUpdateOperation> {
+  static updateOperations(
+    operations: Array<DIDOperation>
+  ): Array<LedgerUpdateOperation> {
     if (operations.length > 32) {
       throw new Error("Maximum number of DID operations exceeded: 32");
     }
 
-    const transformedOperations = operations.map(op => this.updateOperation(op));
-    const padding = new Array(32 - transformedOperations.length).fill(this.defaultLedgerUpdateOperation);
+    const transformedOperations = operations.map((op) =>
+      this.updateOperation(op)
+    );
+    const padding = new Array(32 - transformedOperations.length).fill(
+      this.defaultLedgerUpdateOperation
+    );
     return [...transformedOperations, ...padding];
   }
 }

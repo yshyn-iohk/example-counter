@@ -9,16 +9,12 @@ import {
   Contract,
   type Ledger,
   ledger,
-  VerificationMethodRelation,
-  VerificationMethodType,
-  VerificationMethod,
   DIDUpdateOperation,
-  OperationType
 } from "../managed/did/contract/index.cjs";
 
 import { OperationBuilder } from "../ledger-operation-builder";
 
-import { DIDDocumentToLedger } from "../ledger-mapping"
+import { DIDDocumentToLedger } from "../ledger-mapping";
 
 import { type MidnightDIDPrivateState, witnesses } from "../witnesses.js";
 
@@ -37,7 +33,9 @@ export class MidnightDIDSimulator {
       currentZswapLocalState
     } = this.contract.initialState(
       constructorContext({}, "0".repeat(64)),
-      operations.length > 0 ? operations : new Array(32).fill(DIDDocumentToLedger.defaultLedgerUpdateOperation)
+      operations.length > 0
+        ? operations
+        : new Array(32).fill(DIDDocumentToLedger.defaultLedgerUpdateOperation)
     );
     this.circuitContext = {
       currentPrivateState,

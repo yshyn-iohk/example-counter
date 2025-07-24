@@ -48,7 +48,9 @@ describe("MidnightDIDSimulator", () => {
     );
     expect(() =>
       sim.applyOperation(
-        OperationBuilder.addVerificationMethod({ verificationMethod: mockMethod })
+        OperationBuilder.addVerificationMethod({
+          verificationMethod: mockMethod
+        })
       )
     ).toThrow();
   });
@@ -75,7 +77,9 @@ describe("MidnightDIDSimulator", () => {
   it("fails to update non-existent verification method", () => {
     expect(() =>
       sim.applyOperation(
-        OperationBuilder.updateVerificationMethod({ verificationMethod: mockMethod })
+        OperationBuilder.updateVerificationMethod({
+          verificationMethod: mockMethod
+        })
       )
     ).toThrow();
   });
@@ -100,7 +104,9 @@ describe("MidnightDIDSimulator", () => {
 
   it("adds and removes a relation", () => {
     sim.applyOperations([
-      OperationBuilder.addVerificationMethod({ verificationMethod: mockMethod }),
+      OperationBuilder.addVerificationMethod({
+        verificationMethod: mockMethod
+      }),
       OperationBuilder.addVerificationMethodRelation({
         relation: VerificationMethodRelation.Authentication,
         methodId: mockMethod.id
@@ -118,7 +124,9 @@ describe("MidnightDIDSimulator", () => {
     );
 
     ledger = sim.getLedger();
-    expect(ledger.authenticationRelation.member(mockMethod.id)).not.toBeTruthy();
+    expect(
+      ledger.authenticationRelation.member(mockMethod.id)
+    ).not.toBeTruthy();
   });
 
   it("fails to add relation to unknown method", () => {
@@ -155,14 +163,18 @@ describe("MidnightDIDSimulator", () => {
     sim.applyOperation(OperationBuilder.deactivate());
     expect(() =>
       sim.applyOperation(
-        OperationBuilder.addVerificationMethod({ verificationMethod: mockMethod })
+        OperationBuilder.addVerificationMethod({
+          verificationMethod: mockMethod
+        })
       )
     ).toThrow();
   });
 
   it("batch update mode: initializes with multiple operations", () => {
     const operations = [
-      OperationBuilder.addVerificationMethod({ verificationMethod: mockMethod }),
+      OperationBuilder.addVerificationMethod({
+        verificationMethod: mockMethod
+      }),
       OperationBuilder.addVerificationMethodRelation({
         relation: VerificationMethodRelation.Authentication,
         methodId: mockMethod.id

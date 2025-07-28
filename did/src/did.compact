@@ -121,12 +121,18 @@ export struct DIDUpdateOperation {
   removeServiceOptions: RemoveServiceOptions,
 }
 
-constructor(operations: Vector<32, DIDUpdateOperation>) {
+constructor() {
   id = kernel.self();
   active = true;
-
-  applyOperations(operations);
 }
+
+//TODO: clarify with Midnight team how to find/deploy the smart contract with args
+// constructor(operations: Vector<32, DIDUpdateOperation>) {
+//   id = kernel.self();
+//   active = true;
+
+//   applyOperations(operations);
+// }
 
 export circuit applyOperations(operations: Vector<32, DIDUpdateOperation>): [] {
   assert(disclose(active), "Contract is not active");
@@ -270,8 +276,7 @@ circuit removeService(options: RemoveServiceOptions): [] {
 
 }
 
-export circuit deactivate(): [] {
+circuit deactivate(): [] {
   assert(active, "DID is already inactive");
   active = false;
-  version.increment(1);
 }

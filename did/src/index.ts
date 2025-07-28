@@ -14,6 +14,7 @@
 // limitations under the License.
 
 export * as DIDContract from "./managed/did/contract/index.cjs";
+export * from "./ledger-operation-builder";
 export * from "./witnesses";
 export * from "./midnight-did";
 export * from "./did-document";

@@ -62,6 +62,8 @@ export class LedgerToDIDDocument {
     ledger: Ledger,
     network: MidnightNetwork
   ): DIDDocument {
+    //TODO: replace the context with the real
+    //TODO: think about the context for the new key type
     const MidnightDIDDocumentContext = Array.of("http://localhost/foo/bar");
 
     const contractAddress = Buffer.from(ledger.id.bytes).toString("hex");

@@ -33,9 +33,6 @@ export class MidnightDIDSimulator {
       currentZswapLocalState
     } = this.contract.initialState(
       constructorContext({}, "0".repeat(64)),
-      operations.length > 0
-        ? operations
-        : new Array(32).fill(DIDDocumentToLedger.defaultLedgerUpdateOperation)
     );
     this.circuitContext = {
       currentPrivateState,

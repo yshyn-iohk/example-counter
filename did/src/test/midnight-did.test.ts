@@ -34,12 +34,12 @@ describe("parseMidnightDID", () => {
     expect(result.id).toBe(VALID_ID);
   });
 
-  it("parses did:midnight:standalone:<id>", () => {
-    const input = `did:midnight:standalone:${VALID_ID}`;
+  it("parses did:midnight:undeployed:<id>", () => {
+    const input = `did:midnight:undeployed:${VALID_ID}`;
     const result = parseMidnightDID(input);
 
     expect(result.raw).toBe(input);
-    expect(result.network).toBe(MidnightNetwork.Standalone);
+    expect(result.network).toBe(MidnightNetwork.Undeployed);
     expect(result.id).toBe(VALID_ID);
   });
 

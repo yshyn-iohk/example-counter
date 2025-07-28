@@ -16,15 +16,18 @@
 import { z } from "zod/v4-mini";
 
 export enum MidnightNetwork {
-  Standalone = "standalone",
+  Undeployed = "undeployed",
+  DevNet = "devnet",
   Testnet = "testnet",
-  Mainnet = "mainnet"
+  Mainnet = "mainnet",
 }
 
+//TODO: try to used existing enum
 const NETWORKS = [
-  MidnightNetwork.Mainnet,
+  MidnightNetwork.Undeployed,
+  MidnightNetwork.DevNet,
   MidnightNetwork.Testnet,
-  MidnightNetwork.Standalone
+  MidnightNetwork.Mainnet,
 ] as const;
 const HEX_66_REGEX = /^[0-9a-f]{66}$/;
 

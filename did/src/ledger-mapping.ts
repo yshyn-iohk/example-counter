@@ -18,7 +18,7 @@ import {
   VerificationMethod,
   publicKeyMultibaseToBytes
 } from "./did-document";
-import { MidnightNetwork, createMidnightDID } from "./midnight-did";
+import { MidnightNetwork, createMidnightDIDString } from "./midnight-did";
 import { DIDOperation, DIDOperationType } from "./did-operations";
 
 //TODO: rename DIDDocument to Domain
@@ -68,7 +68,7 @@ export class LedgerToDIDDocument {
 
     const contractAddress = Buffer.from(ledger.id.bytes).toString("hex");
 
-    const did = createMidnightDID(contractAddress, network);
+    const did = createMidnightDIDString(contractAddress, network);
 
     const verificationMethod = Array.from(ledger.verificationMethods).map(
       ([id, method]) =>
@@ -120,6 +120,7 @@ export class LedgerToDIDDocument {
 
 // TODO: rename DIDDocument to Domain
 export class DIDDocumentToLedger {
+
   static readonly VerificationMethodTypeMap: Record<
     VerificationMethodType,
     LedgerVerificationMethodType

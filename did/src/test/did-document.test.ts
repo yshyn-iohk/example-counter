@@ -1,18 +1,14 @@
 // Combined Test Suite: did-document.test.ts + did-document2.test.ts
 
-import { describe, it, expect } from "vitest";
+import { describe, expect, it } from "vitest";
 import {
-  parseDID,
-  parseDIDURL,
-  parseDIDDocument,
-  parseVerificationMethod,
-  parseService,
-  parseDIDResolutionResult,
-  createVerificationMethod,
-  createService,
   createDIDDocument,
-  KnownDIDMediaTypes,
+  createService,
+  createVerificationMethod,
   KnownDIDMediaTypesSchema,
+  parseDID,
+  parseDIDResolutionResult,
+  parseDIDURL,
   VerificationMethodType
 } from "../did-document";
 

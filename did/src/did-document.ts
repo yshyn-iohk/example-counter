@@ -148,6 +148,8 @@ export const parseDIDResolutionResult = (input: unknown) =>
   DIDResolutionResultSchema.parse(input);
 export const parseVerificationMethodType = (input: unknown) =>
   VerificationMethodTypeSchema.parse(input);
+export const parseVerificationMethodRelation = (input: unknown) =>
+  VerificationMethodRelationTypeSchema.parse(input);
 
 /** Creation Helpers */
 export function createVerificationMethod(params: {

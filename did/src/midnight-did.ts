@@ -91,16 +91,14 @@ export function parseMidnightDID(input: unknown): MidnightDID {
   return MidnightDIDSchema.parse(input as string);
 }
 
-export function createMidnightDID(
+export function createMidnightDIDString(
   id: string,
   network: MidnightNetwork = MidnightNetwork.Mainnet
-): string {
+): MidnightDIDString {
   if (!HEX_66_REGEX.test(id)) {
     throw new Error(
       "Invalid DID ID format: must be 66 lowercase hex characters."
     );
   }
-  return network === MidnightNetwork.Mainnet
-    ? `did:midnight:${id}`
-    : `did:midnight:${network}:${id}`;
+  return MidnightDIDStringSchema.parse(`did:midnight:${network}:${id}`);
 }

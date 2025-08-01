@@ -13,5 +13,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// TODO: add Domain to Ledger mapping for the verification method
+// TODO: refactor network to align with the Midnight names
+// TODO: support batch update in the contract
+// TODO: support authentication in the contract
+// TODO: add services to the contract, domain and cli
+// TODO: implement the did-cli
+// TODO: add SecretStorage abbstraction
+// TODO: implement did resolver
+// TODO: restructure the project to midnight-did
+// TODO: compose the specification for the Midnight DID method
+
 export * from './api';
 export * from './cli';

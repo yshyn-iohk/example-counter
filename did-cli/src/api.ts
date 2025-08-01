@@ -16,7 +16,18 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { type ContractAddress } from '@midnight-ntwrk/compact-runtime';
-import { Counter, type CounterPrivateState, witnesses } from '@midnight-ntwrk/counter-contract';
+import {
+  MidnightDIDPrivateState,
+  DIDContract,
+  witnesses,
+  DIDDocument,
+  DIDDocumentToLedger,
+  LedgerToDIDDocument,
+  MidnightNetwork,
+  DIDOperation,
+  DIDOperationType,
+  OperationBuilder,
+} from '@midnight-ntwrk/did-contract';
 import { type CoinInfo, nativeToken, Transaction, type TransactionId } from '@midnight-ntwrk/ledger';
 import { deployContract, findDeployedContract } from '@midnight-ntwrk/midnight-js-contracts';
 import { httpClientProofProvider } from '@midnight-ntwrk/midnight-js-http-client-proof-provider';
@@ -38,17 +49,20 @@ import { type Logger } from 'pino';
 import * as Rx from 'rxjs';
 import { WebSocket } from 'ws';
 import {
-  type CounterContract,
-  type CounterPrivateStateId,
-  type CounterProviders,
-  type DeployedCounterContract,
+  type MidnightDIDContract,
+  type MidnightDIDPrivateStateId,
+  type MidnightDIDProviders,
+  type DeployedMidnightDIDContract,
+  NetworkMapping,
 } from './common-types';
 import { type Config, contractConfig } from './config';
 import { levelPrivateStateProvider } from '@midnight-ntwrk/midnight-js-level-private-state-provider';
 import { assertIsContractAddress, toHex } from '@midnight-ntwrk/midnight-js-utils';
-import { getLedgerNetworkId, getZswapNetworkId } from '@midnight-ntwrk/midnight-js-network-id';
+import { getLedgerNetworkId, getNetworkId, getZswapNetworkId, NetworkId } from '@midnight-ntwrk/midnight-js-network-id';
 import * as fsAsync from 'node:fs/promises';
 import * as fs from 'node:fs';
+import { match } from 'node:assert';
+import { type Interface } from 'node:readline/promises';
 
 let logger: Logger;
 // Instead of setting globalThis.crypto which is read-only, we'll ensure crypto is available
@@ -56,68 +70,124 @@ let logger: Logger;
 // @ts-expect-error: It's needed to enable WebSocket usage through apollo
 globalThis.WebSocket = WebSocket;
 
-export const getCounterLedgerState = async (
-  providers: CounterProviders,
+export const getMidnightDIDLedgerState = async (
+  providers: MidnightDIDProviders,
   contractAddress: ContractAddress,
-): Promise<bigint | null> => {
+): Promise<DIDContract.Ledger | null> => {
   assertIsContractAddress(contractAddress);
-  logger.info('Checking contract ledger state...');
+  logger.info('Checking MidnightDID contract ledger state...');
   const state = await providers.publicDataProvider
     .queryContractState(contractAddress)
-    .then((contractState) => (contractState != null ? Counter.ledger(contractState.data).round : null));
+    .then((contractState) => (contractState != null
+      ? DIDContract.ledger(contractState.data)
+      : null)
+    );
   logger.info(`Ledger state: ${state}`);
   return state;
 };
 
-export const counterContractInstance: CounterContract = new Counter.Contract(witnesses);
+export const midnightDIDContractInstance: MidnightDIDContract = new DIDContract.Contract(witnesses);
 
 export const joinContract = async (
-  providers: CounterProviders,
+  providers: MidnightDIDProviders,
   contractAddress: string,
-): Promise<DeployedCounterContract> => {
+): Promise<DeployedMidnightDIDContract> => {
   const counterContract = await findDeployedContract(providers, {
     contractAddress,
-    contract: counterContractInstance,
-    privateStateId: 'counterPrivateState',
-    initialPrivateState: { privateCounter: 0 },
+    contract: midnightDIDContractInstance,
+    privateStateId: 'midnightDIDPrivateState',
+    initialPrivateState: {},
   });
   logger.info(`Joined contract at address: ${counterContract.deployTxData.public.contractAddress}`);
   return counterContract;
 };
 
 export const deploy = async (
-  providers: CounterProviders,
-  privateState: CounterPrivateState,
-): Promise<DeployedCounterContract> => {
-  logger.info('Deploying counter contract...');
-  const counterContract = await deployContract(providers, {
-    contract: counterContractInstance,
-    privateStateId: 'counterPrivateState',
+  providers: MidnightDIDProviders,
+  privateState: MidnightDIDPrivateState,
+): Promise<DeployedMidnightDIDContract> => {
+  logger.info('Deploying Midnight DID contract...');
+  const didContract = await deployContract(providers, {
+    contract: midnightDIDContractInstance,
+    privateStateId: 'midnightDIDPrivateState',
     initialPrivateState: privateState,
   });
-  logger.info(`Deployed contract at address: ${counterContract.deployTxData.public.contractAddress}`);
-  return counterContract;
+  logger.info(`Deployed contract at address: ${didContract.deployTxData.public.contractAddress}`);
+  return didContract;
 };
 
-export const increment = async (counterContract: DeployedCounterContract): Promise<FinalizedTxData> => {
-  logger.info('Incrementing...');
-  const finalizedTxData = await counterContract.callTx.increment();
+
+// Create DID operation is the same as deploy the contract operation
+// Later it can be optimized to create the DID with the keys and services
+export const createDID = async (
+  providers: MidnightDIDProviders,
+  privateState: MidnightDIDPrivateState,
+): Promise<DeployedMidnightDIDContract> => {
+  logger.info('Creating DID...');
+  const didContract = await deploy(providers, privateState);
+  logger.info(`Created DID at contract address: ${didContract.deployTxData.public.contractAddress}`);
+  return didContract;
+};
+
+export const updateDID = async (
+  didContract: DeployedMidnightDIDContract,
+  patches: Array<DIDOperation>,
+): Promise<FinalizedTxData> => {
+  if (patches.length === 0) {
+    throw new Error('No DID operations were provided.');
+  }
+
+  logger.info(`Updating DID at contract address: ${didContract.deployTxData.public.contractAddress}`);
+
+  let ledgerOperations = OperationBuilder.padding(DIDDocumentToLedger.updateOperations(patches));
+  const finalizedTxData = await didContract.callTx.applyOperations(ledgerOperations);
+
   logger.info(`Transaction ${finalizedTxData.public.txId} added in block ${finalizedTxData.public.blockHeight}`);
+
   return finalizedTxData.public;
 };
 
-export const displayCounterValue = async (
-  providers: CounterProviders,
-  counterContract: DeployedCounterContract,
-): Promise<{ counterValue: bigint | null; contractAddress: string }> => {
-  const contractAddress = counterContract.deployTxData.public.contractAddress;
-  const counterValue = await getCounterLedgerState(providers, contractAddress);
-  if (counterValue === null) {
-    logger.info(`There is no counter contract deployed at ${contractAddress}.`);
-  } else {
-    logger.info(`Current counter value: ${Number(counterValue)}`);
+//TODO: Find the right place for this utils
+export class DomainToRuntime {
+  static readonly NetworkMap: Record<MidnightNetwork, NetworkId> = {
+    [MidnightNetwork.Undeployed]: NetworkId.Undeployed,
+    [MidnightNetwork.DevNet]: NetworkId.DevNet,
+    [MidnightNetwork.Testnet]: NetworkId.TestNet,
+    [MidnightNetwork.Mainnet]: NetworkId.MainNet,
   }
-  return { contractAddress, counterValue };
+};
+
+export class RuntimeToDomain {
+  static readonly NetworkMap: Record<NetworkId, MidnightNetwork> = {
+    [NetworkId.Undeployed]: MidnightNetwork.Undeployed,
+    [NetworkId.DevNet]: MidnightNetwork.DevNet,
+    [NetworkId.TestNet]: MidnightNetwork.Testnet,
+    [NetworkId.MainNet]: MidnightNetwork.Mainnet,
+  };
+};
+
+export const midnightNetwork: MidnightNetwork = RuntimeToDomain.NetworkMap[getNetworkId()];
+
+export const resolveDID = async (
+  providers: MidnightDIDProviders,
+  didContract: DeployedMidnightDIDContract,
+): Promise<DIDDocument | null> => {
+  const network = getNetworkId();
+  const midnightNetwork = RuntimeToDomain.NetworkMap[network];
+
+  const contractAddress = didContract.deployTxData.public.contractAddress;
+  const didContractState = await getMidnightDIDLedgerState(providers, contractAddress);
+  if (didContractState === null) {
+    logger.info(`There is no Midnight DID contract deployed at ${contractAddress}.`);
+    return null;
+  } else {
+    let didDocument = LedgerToDIDDocument.ledgerStateToDIDDocument(didContractState, midnightNetwork);
+    logger.info(
+      `MidnightDID Document:
+       ${didDocument}
+       `);
+    return didDocument;
+  }
 };
 
 export const createWalletAndMidnightProvider = async (wallet: Wallet): Promise<WalletProvider & MidnightProvider> => {
@@ -322,11 +392,11 @@ export const buildFreshWallet = async (config: Config): Promise<Wallet & Resourc
 export const configureProviders = async (wallet: Wallet & Resource, config: Config) => {
   const walletAndMidnightProvider = await createWalletAndMidnightProvider(wallet);
   return {
-    privateStateProvider: levelPrivateStateProvider<typeof CounterPrivateStateId>({
+    privateStateProvider: levelPrivateStateProvider<typeof MidnightDIDPrivateStateId>({
       privateStateStoreName: contractConfig.privateStateStoreName,
     }),
     publicDataProvider: indexerPublicDataProvider(config.indexer, config.indexerWS),
-    zkConfigProvider: new NodeZkConfigProvider<'increment'>(contractConfig.zkConfigPath),
+    zkConfigProvider: new NodeZkConfigProvider<'applyOperations'>(contractConfig.zkConfigPath),
     proofProvider: httpClientProofProvider(config.proofServer),
     walletProvider: walletAndMidnightProvider,
     midnightProvider: walletAndMidnightProvider,

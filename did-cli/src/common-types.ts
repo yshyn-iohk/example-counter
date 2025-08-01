@@ -13,16 +13,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Counter, type CounterPrivateState } from '@midnight-ntwrk/counter-contract';
+import { DIDContract, MidnightNetwork } from '@midnight-ntwrk/did-contract';
+import { type MidnightDIDPrivateState } from '@midnight-ntwrk/did-contract';
 import type { ImpureCircuitId, MidnightProviders } from '@midnight-ntwrk/midnight-js-types';
 import type { DeployedContract, FoundContract } from '@midnight-ntwrk/midnight-js-contracts';
+import { NetworkId } from '@midnight-ntwrk/ledger';
 
-export type CounterCircuits = ImpureCircuitId<Counter.Contract<CounterPrivateState>>;
+export type MidnightDIDCircuits = ImpureCircuitId<DIDContract.Contract<MidnightDIDPrivateState>>;
 
-export const CounterPrivateStateId = 'counterPrivateState';
+export const MidnightDIDPrivateStateId = 'midnightDIDPrivateState';
 
-export type CounterProviders = MidnightProviders<CounterCircuits, typeof CounterPrivateStateId, CounterPrivateState>;
+export type MidnightDIDProviders = MidnightProviders<MidnightDIDCircuits, typeof MidnightDIDPrivateStateId, MidnightDIDPrivateState>;
 
-export type CounterContract = Counter.Contract<CounterPrivateState>;
+export type MidnightDIDContract = DIDContract.Contract<MidnightDIDPrivateState>;
 
-export type DeployedCounterContract = DeployedContract<CounterContract> | FoundContract<CounterContract>;
+export type DeployedMidnightDIDContract = DeployedContract<MidnightDIDContract> | FoundContract<MidnightDIDContract>;
+
+export const NetworkMapping: Record<NetworkId, MidnightNetwork> = {
+    [NetworkId.Undeployed]: MidnightNetwork.Undeployed,
+    [NetworkId.DevNet]: MidnightNetwork.DevNet,
+    [NetworkId.TestNet]: MidnightNetwork.Testnet,
+    [NetworkId.MainNet]: MidnightNetwork.Mainnet
+};

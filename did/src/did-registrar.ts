@@ -1,5 +1,5 @@
-import { DIDOperation } from "./did-operations";
 import { DIDDocument } from "./did-document";
+import { DIDOperation } from "./did-operations";
 
 /**
  * A generic DIDRegistrar interface following the W3C DID Core specification.

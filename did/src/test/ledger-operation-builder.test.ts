@@ -1,10 +1,10 @@
-import { describe, it, expect } from "vitest";
+import { describe, expect, it } from "vitest";
 
 import { OperationBuilder } from "../ledger-operation-builder";
 import {
   OperationType,
-  VerificationMethodType,
-  VerificationMethodRelation
+  VerificationMethodRelation,
+  VerificationMethodType
 } from "../managed/did/contract/index.cjs";
 
 describe("OperationBuilder", () => {

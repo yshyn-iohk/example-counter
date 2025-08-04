@@ -1,0 +1,19 @@
+{
+//   "files": [],
+  "include": [
+    "./did/vitest.config.ts",
+    "./did-counter/vitest.config.ts",
+    "./contract/vitest.config.ts",
+    "./counter-cli/vitest.config.ts"
+  ],
+  "references": [
+    { "path": "./counter-cli" },
+    { "path": "./contract" },
+    { "path": "./did-cli" },
+    { "path": "./did" }
+  ],
+  "compilerOptions": {
+    "composite": true,
+    "skipLibCheck": true
+  }
+}

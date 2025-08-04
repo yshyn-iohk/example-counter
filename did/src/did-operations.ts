@@ -1,9 +1,10 @@
 import { z } from "zod/v4-mini";
+
 import {
   VerificationMethod,
-  VerificationMethodSchema,
   VerificationMethodRelation,
-  VerificationMethodRelationTypeSchema
+  VerificationMethodRelationTypeSchema,
+  VerificationMethodSchema
 } from "./did-document";
 
 /**

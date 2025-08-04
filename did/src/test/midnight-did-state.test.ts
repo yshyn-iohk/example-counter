@@ -1,11 +1,11 @@
-import { describe, it, beforeEach, expect } from "vitest";
-import { MidnightDIDSimulator } from "./midnight-did-simulator";
-import {
-  VerificationMethodType,
-  VerificationMethodRelation
-} from "../managed/did/contract/index.cjs";
+import { beforeEach, describe, expect, it } from "vitest";
 
 import { OperationBuilder } from "../ledger-operation-builder";
+import {
+  VerificationMethodRelation,
+  VerificationMethodType
+} from "../managed/did/contract/index.cjs";
+import { MidnightDIDSimulator } from "./midnight-did-simulator";
 
 const mockMethod = {
   id: "did:midnight:xyz#key-1",
@@ -168,21 +168,21 @@ describe("MidnightDIDSimulator", () => {
     ).toThrow();
   });
 
-//   it("batch update mode: initializes with multiple operations", () => {
-//     const operations = [
-//       OperationBuilder.addVerificationMethod({
-//         verificationMethod: mockMethod
-//       }),
-//       OperationBuilder.addVerificationMethodRelation({
-//         relation: VerificationMethodRelation.Authentication,
-//         methodId: mockMethod.id
-//       })
-//     ];
-//     sim = new MidnightDIDSimulator(OperationBuilder.padding(operations));
-//     const ledger = sim.getLedger();
-//     expect(ledger.verificationMethods.member(mockMethod.id)).toBeTruthy();
-//     expect(ledger.authenticationRelation.member(mockMethod.id)).toBeTruthy();
-//   });
+  //   it("batch update mode: initializes with multiple operations", () => {
+  //     const operations = [
+  //       OperationBuilder.addVerificationMethod({
+  //         verificationMethod: mockMethod
+  //       }),
+  //       OperationBuilder.addVerificationMethodRelation({
+  //         relation: VerificationMethodRelation.Authentication,
+  //         methodId: mockMethod.id
+  //       })
+  //     ];
+  //     sim = new MidnightDIDSimulator(OperationBuilder.padding(operations));
+  //     const ledger = sim.getLedger();
+  //     expect(ledger.verificationMethods.member(mockMethod.id)).toBeTruthy();
+  //     expect(ledger.authenticationRelation.member(mockMethod.id)).toBeTruthy();
+  //   });
 
   it("throws error when more than 32 operations are passed", () => {
     const ops = Array.from({ length: 33 }, () => OperationBuilder.deactivate());

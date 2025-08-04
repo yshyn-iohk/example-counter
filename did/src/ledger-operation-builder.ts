@@ -1,17 +1,17 @@
 import {
+  AddServiceOptions,
+  AddVerificationMethodOptions,
+  AddVerificationMethodRelationOptions,
   DIDUpdateOperation,
   OperationType,
+  RemoveServiceOptions,
+  RemoveVerificationMethodOptions,
+  RemoveVerificationMethodRelationOptions,
+  UpdateServiceOptions,
+  UpdateVerificationMethodOptions,
   VerificationMethod,
   VerificationMethodRelation,
-  VerificationMethodType,
-  AddVerificationMethodOptions,
-  UpdateVerificationMethodOptions,
-  RemoveVerificationMethodOptions,
-  AddVerificationMethodRelationOptions,
-  RemoveVerificationMethodRelationOptions,
-  AddServiceOptions,
-  UpdateServiceOptions,
-  RemoveServiceOptions
+  VerificationMethodType
 } from "./managed/did/contract/index.cjs";
 
 export class OperationBuilder {

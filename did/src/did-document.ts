@@ -1,3 +1,4 @@
+import { Buffer } from "buffer";
 import { z } from "zod/v4-mini";
 
 /** DID URL schema */
@@ -18,7 +19,7 @@ export const DIDSchema = z
     z.startsWith("did:"),
     z.minLength(5),
     z.refine(
-      (val) => val.split(":").length >= 3 && !/[\/?#]/.test(val),
+      (val) => val.split(":").length >= 3 && !/[/?#]/.test(val),
       "Invalid DID format"
     )
   )

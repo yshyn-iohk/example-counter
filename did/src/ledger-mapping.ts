@@ -1,25 +1,25 @@
-import {
-  Ledger,
-  VerificationMethodType as LedgerVerificationMethodType,
-  VerificationMethodRelation as LedgerVerificationMethodRelation,
-  VerificationMethod as LedgerVerificationMethod,
-  DIDUpdateOperation as LedgerUpdateOperation,
-  OperationType as LedgerOperationType
-} from "./managed/did/contract/index.cjs";
-import {
-  VerificationMethodType,
-  VerificationMethodRelationType
-} from "./did-document";
+import { Buffer } from "buffer";
+
 import {
   bytesToPublicKeyMultibase,
   createDIDDocument,
   createVerificationMethod,
   DIDDocument,
+  publicKeyMultibaseToBytes,
   VerificationMethod,
-  publicKeyMultibaseToBytes
+  VerificationMethodRelationType,
+  VerificationMethodType
 } from "./did-document";
-import { MidnightNetwork, createMidnightDIDString } from "./midnight-did";
 import { DIDOperation, DIDOperationType } from "./did-operations";
+import {
+  DIDUpdateOperation as LedgerUpdateOperation,
+  Ledger,
+  OperationType as LedgerOperationType,
+  VerificationMethod as LedgerVerificationMethod,
+  VerificationMethodRelation as LedgerVerificationMethodRelation,
+  VerificationMethodType as LedgerVerificationMethodType
+} from "./managed/did/contract/index.cjs";
+import { createMidnightDIDString, MidnightNetwork } from "./midnight-did";
 
 //TODO: rename DIDDocument to Domain
 export class LedgerToDIDDocument {
@@ -120,7 +120,6 @@ export class LedgerToDIDDocument {
 
 // TODO: rename DIDDocument to Domain
 export class DIDDocumentToLedger {
-
   static readonly VerificationMethodTypeMap: Record<
     VerificationMethodType,
     LedgerVerificationMethodType

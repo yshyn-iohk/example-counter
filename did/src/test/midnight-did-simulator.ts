@@ -1,21 +1,18 @@
 import {
   type CircuitContext,
+  constructorContext,
   QueryContext,
-  sampleContractAddress,
-  constructorContext
+  sampleContractAddress
 } from "@midnight-ntwrk/compact-runtime";
 
+import { DIDDocumentToLedger } from "../ledger-mapping";
+import { OperationBuilder } from "../ledger-operation-builder";
 import {
   Contract,
-  type Ledger,
-  ledger,
   DIDUpdateOperation,
+  type Ledger,
+  ledger
 } from "../managed/did/contract/index.cjs";
-
-import { OperationBuilder } from "../ledger-operation-builder";
-
-import { DIDDocumentToLedger } from "../ledger-mapping";
-
 import { type MidnightDIDPrivateState, witnesses } from "../witnesses.js";
 
 export class MidnightDIDSimulator {
@@ -31,9 +28,7 @@ export class MidnightDIDSimulator {
       currentPrivateState,
       currentContractState,
       currentZswapLocalState
-    } = this.contract.initialState(
-      constructorContext({}, "0".repeat(64)),
-    );
+    } = this.contract.initialState(constructorContext({}, "0".repeat(64)));
     this.circuitContext = {
       currentPrivateState,
       currentZswapLocalState,

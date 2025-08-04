@@ -1,7 +1,8 @@
 // midnight-did.test.ts
 
-import { describe, it, expect } from "vitest";
-import { parseMidnightDID, MidnightNetwork } from "../midnight-did";
+import { describe, expect, it } from "vitest";
+
+import { MidnightNetwork, parseMidnightDID } from "../midnight-did";
 
 const VALID_ID =
   "0200c14874a279e61d4bf4eebff76f46fada3afbb0183dff21e741975143dcbdab";

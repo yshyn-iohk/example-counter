@@ -1,6 +1,7 @@
 // Combined Test Suite: did-document.test.ts + did-document2.test.ts
 
 import { describe, expect, it } from "vitest";
+
 import {
   createDIDDocument,
   createService,

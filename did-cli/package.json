@@ -19,6 +19,7 @@
     "start-testnet-remote-ps": "npm run build && npm run testnet-remote-ps"
   },
   "dependencies": {
-    "@midnight-ntwrk/did-contract": "*"
+    "@midnight-ntwrk/did-contract": "*",
+    "@midnight-ntwrk/did:": "*"
   }
 }

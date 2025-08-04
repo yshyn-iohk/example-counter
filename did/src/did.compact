@@ -122,6 +122,7 @@ export struct DIDUpdateOperation {
 }
 
 constructor() {
+  //TODO: clarify with the Midnight team why `id` is not set correctly (did.api.test.ts)
   id = kernel.self();
   active = true;
 }

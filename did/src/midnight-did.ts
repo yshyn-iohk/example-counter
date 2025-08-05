@@ -19,7 +19,7 @@ export enum MidnightNetwork {
   Undeployed = "undeployed",
   DevNet = "devnet",
   Testnet = "testnet",
-  Mainnet = "mainnet",
+  Mainnet = "mainnet"
 }
 
 //TODO: try to used existing enum
@@ -27,7 +27,7 @@ const NETWORKS = [
   MidnightNetwork.Undeployed,
   MidnightNetwork.DevNet,
   MidnightNetwork.Testnet,
-  MidnightNetwork.Mainnet,
+  MidnightNetwork.Mainnet
 ] as const;
 const HEX_66_REGEX = /^[0-9a-f]{66}$/;
 

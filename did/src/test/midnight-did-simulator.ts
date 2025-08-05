@@ -9,7 +9,7 @@ import {
   Contract,
   type Ledger,
   ledger,
-  DIDUpdateOperation,
+  DIDUpdateOperation
 } from "../managed/did/contract/index.cjs";
 
 import { OperationBuilder } from "../ledger-operation-builder";
@@ -31,9 +31,7 @@ export class MidnightDIDSimulator {
       currentPrivateState,
       currentContractState,
       currentZswapLocalState
-    } = this.contract.initialState(
-      constructorContext({}, "0".repeat(64)),
-    );
+    } = this.contract.initialState(constructorContext({}, "0".repeat(64)));
     this.circuitContext = {
       currentPrivateState,
       currentZswapLocalState,

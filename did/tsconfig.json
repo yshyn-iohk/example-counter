@@ -14,9 +14,8 @@
 // limitations under the License.
 
 {
-  "include": ["src/**/*.ts"],
+  "include": ["src/**/*.ts", "vitest.config.ts"],
   "compilerOptions": {
-    "rootDir": "src",
     "outDir": "dist",
     "declaration": true,
     "lib": ["ESNext"],

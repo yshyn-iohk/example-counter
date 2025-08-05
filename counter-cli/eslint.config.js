@@ -2,7 +2,7 @@
 // Copyright (C) 2025 Midnight Foundation
 // SPDX-License-Identifier: Apache-2.0
 // Licensed under the Apache License, Version 2.0 (the "License");
-// You may not use this file except in compliance with the License.
+// you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
 // http://www.apache.org/licenses/LICENSE-2.0
@@ -28,6 +28,12 @@ export default [
         ecmaVersion: "latest",
         sourceType: "module",
         project: ["./tsconfig.json"]
+      },
+      globals: {
+        process: "readonly",
+        Buffer: "readonly",
+        URL: "readonly",
+        setTimeout: "readonly"
       }
     },
     plugins: {
@@ -40,14 +46,13 @@ export default [
       "@typescript-eslint/no-floating-promises": "warn",
       "@typescript-eslint/promise-function-async": "off",
       "@typescript-eslint/no-redeclare": "off",
-      "@typescript-eslint/no-invalid-void-type": "off",
-      "@typescript-eslint/no-unsafe-call": "off",
-      "@typescript-eslint/no-unsafe-member-access": "off",
       "@typescript-eslint/explicit-function-return-type": "off",
-      "@typescript-eslint/consistent-type-definitions": "off"
+      "@typescript-eslint/consistent-type-definitions": "off",
+      "@typescript-eslint/no-unsafe-call": "warn",
+      "@typescript-eslint/no-unsafe-return": "warn",
+      "@typescript-eslint/no-unsafe-assignment": "warn",
+      "@typescript-eslint/no-unsafe-member-access": "warn",
+      "@typescript-eslint/no-unsafe-argument": "warn"
     }
-  },
-  {
-    ignores: ["src/managed/**"]
   }
 ];

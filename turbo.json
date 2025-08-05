@@ -1,0 +1,18 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "tasks": {
+    "compact": {
+      "cache": true,
+      "outputs": ["src/managed/**"]
+    },
+    "build": {
+      "dependsOn": ["^build", "compact"],
+      "outputs": ["dist/**"]
+    },
+    "test": {
+      "dependsOn": ["build"]
+    },
+    "lint": {},
+    "typecheck": {}
+  }
+}

@@ -30,7 +30,10 @@ export default [
         project: ["./tsconfig.json"]
       },
       globals: {
-        Buffer: "readonly"
+        process: "readonly",
+        Buffer: "readonly",
+        URL: "readonly",
+        setTimeout: "readonly"
       }
     },
     plugins: {
@@ -43,14 +46,13 @@ export default [
       "@typescript-eslint/no-floating-promises": "warn",
       "@typescript-eslint/promise-function-async": "off",
       "@typescript-eslint/no-redeclare": "off",
-      "@typescript-eslint/no-invalid-void-type": "off",
-      "@typescript-eslint/no-unsafe-call": "off",
-      "@typescript-eslint/no-unsafe-member-access": "off",
       "@typescript-eslint/explicit-function-return-type": "off",
-      "@typescript-eslint/consistent-type-definitions": "off"
+      "@typescript-eslint/consistent-type-definitions": "off",
+      "@typescript-eslint/no-unsafe-call": "warn",
+      "@typescript-eslint/no-unsafe-return": "warn",
+      "@typescript-eslint/no-unsafe-assignment": "warn",
+      "@typescript-eslint/no-unsafe-member-access": "warn",
+      "@typescript-eslint/no-unsafe-argument": "warn"
     }
-  },
-  {
-    ignores: ["src/managed/**"]
   }
 ];

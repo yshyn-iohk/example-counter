@@ -168,21 +168,21 @@ describe("MidnightDIDSimulator", () => {
     ).toThrow();
   });
 
-//   it("batch update mode: initializes with multiple operations", () => {
-//     const operations = [
-//       OperationBuilder.addVerificationMethod({
-//         verificationMethod: mockMethod
-//       }),
-//       OperationBuilder.addVerificationMethodRelation({
-//         relation: VerificationMethodRelation.Authentication,
-//         methodId: mockMethod.id
-//       })
-//     ];
-//     sim = new MidnightDIDSimulator(OperationBuilder.padding(operations));
-//     const ledger = sim.getLedger();
-//     expect(ledger.verificationMethods.member(mockMethod.id)).toBeTruthy();
-//     expect(ledger.authenticationRelation.member(mockMethod.id)).toBeTruthy();
-//   });
+  //   it("batch update mode: initializes with multiple operations", () => {
+  //     const operations = [
+  //       OperationBuilder.addVerificationMethod({
+  //         verificationMethod: mockMethod
+  //       }),
+  //       OperationBuilder.addVerificationMethodRelation({
+  //         relation: VerificationMethodRelation.Authentication,
+  //         methodId: mockMethod.id
+  //       })
+  //     ];
+  //     sim = new MidnightDIDSimulator(OperationBuilder.padding(operations));
+  //     const ledger = sim.getLedger();
+  //     expect(ledger.verificationMethods.member(mockMethod.id)).toBeTruthy();
+  //     expect(ledger.authenticationRelation.member(mockMethod.id)).toBeTruthy();
+  //   });
 
   it("throws error when more than 32 operations are passed", () => {
     const ops = Array.from({ length: 33 }, () => OperationBuilder.deactivate());

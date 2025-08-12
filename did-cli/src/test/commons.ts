@@ -126,11 +126,11 @@ export class TestEnvironment {
       const composeFile = process.env.COMPOSE_FILE ?? 'standalone.yml';
       this.logger.info(`Using compose file: ${composeFile}`);
       this.dockerEnv = new DockerComposeEnvironment(path.resolve(currentDir, '..'), composeFile)
-        .withWaitStrategy(
-          'counter-proof-server',
+        .withWaitStrategy('counter-proof-server',
           Wait.forLogMessage('Actix runtime found; starting in Actix runtime', 1),
         )
-        .withWaitStrategy('counter-indexer', Wait.forLogMessage(/starting indexing/, 1));
+        .withWaitStrategy('counter-indexer', 
+          Wait.forLogMessage(/starting indexing/, 1));
       this.env = await this.dockerEnv.up();
 
       this.testConfig.dappConfig = {
@@ -164,7 +164,7 @@ export class TestEnvironment {
       .withExposedPorts(6300)
       .withCommand([`midnight-proof-server --network ${env}`])
       .withEnvironment({ RUST_BACKTRACE: 'full' })
-      .withWaitStrategy(Wait.forLogMessage('Actix runtime found; starting in Actix runtime', 1))
+      .withWaitStrategy(Wait.forLogMessage('Actix runtime found; starting in Actix runtime', 1000000))
       .start();
 
   shutdown = async () => {

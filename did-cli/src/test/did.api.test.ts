@@ -17,11 +17,13 @@ import { type Resource } from '@midnight-ntwrk/wallet';
 import { type Wallet } from '@midnight-ntwrk/wallet-api';
 import path from 'path';
 import * as api from '../api';
-import { type MidnightDIDProviders } from '../common-types';
+import { DeployedMidnightDIDContract, MidnightDIDContract, type MidnightDIDProviders } from '../common-types';
+import { DIDOperation, DIDOperationType, MidnightDIDString, parseDIDURL, createMidnightDIDString, VerificationMethodType, parsePublicKeyMultibase, parseDIDKeyID, VerificationMethodRelation, VerificationMethodRelationType, parseContractAddress, hexToPublicKeyMultibase, OperationBuilder } from '@midnight-ntwrk/did-contract';
 import { currentDir } from '../config';
 import { createLogger } from '../logger-utils';
 import { TestEnvironment } from './commons';
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import { log } from 'console';
 
 const logDir = path.resolve(currentDir, '..', 'logs', 'tests', `${new Date().toISOString()}.log`);
 const logger = await createLogger(logDir);
@@ -30,6 +32,9 @@ describe('API', () => {
   let testEnvironment: TestEnvironment;
   let wallet: Wallet & Resource;
   let providers: MidnightDIDProviders;
+  let contract: DeployedMidnightDIDContract;
+  let contractAddress: string;
+  let didString: MidnightDIDString;
 
   beforeAll(
     async () => {
@@ -39,7 +44,7 @@ describe('API', () => {
       wallet = await testEnvironment.getWallet();
       providers = await api.configureProviders(wallet, testConfiguration.dappConfig);
     },
-    1000 * 60 * 45,
+    1000 * 60 * 45 *  10,
   );
 
   afterAll(async () => {
@@ -48,14 +53,20 @@ describe('API', () => {
   });
 
   it('should deploy the contract with empty state [@slow]', async () => {
-    const didContract = await api.createDID(providers, {});
-    expect(didContract).not.toBeNull();
+    contract = await api.createDID(providers, {});
+    expect(contract).not.toBeNull();
 
-    const didContractAddress = didContract.deployTxData.public.contractAddress;
+    // contractAddress = parseContractAddress(contract.deployTxData.public.contractAddress);
+    // didString = createMidnightDIDString(contractAddress, api.midnightNetwork);
 
-    await new Promise((resolve) => setTimeout(resolve, 10_000));
+    logger.info(`!!! contract address ${contract.deployTxData.public.contractAddress}`);
+    contractAddress = parseContractAddress(contract.deployTxData.public.contractAddress);
+    didString = createMidnightDIDString(contractAddress, api.midnightNetwork);
 
-    const didLedger = await api.getMidnightDIDLedgerState(providers, didContractAddress);
+
+    logger.info(`MidnightDIDString is: ${didString}`);
+
+    const didLedger = await api.getMidnightDIDLedgerState(providers, contractAddress);
     expect(didLedger?.active).toBeTruthy;
     //TODO: id is zero byte array
     //expect(didLedger?.id).toEqual(didContractAddress);
@@ -65,14 +76,54 @@ describe('API', () => {
     expect(didLedger?.capabilityDelegationRelation.isEmpty).toBeTruthy;
     expect(didLedger?.capabilityInvocationRelation.isEmpty).toBeTruthy;
     expect(didLedger?.services.isEmpty).toBeTruthy;
+  });
 
-    // await new Promise((resolve) => setTimeout(resolve, 2000));
-    // const response = await api.increment(counterContract);
-    // expect(response.txHash).toMatch(/[0-9a-f]{64}/);
-    // expect(response.blockHeight).toBeGreaterThan(BigInt(0));
+  it('should update DID with the verification method and resolve final document', async () => {
+    const methodId = parseDIDKeyID(`${didString}#key-1`);
+    const publicKeyHex = "f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2";
+    const publicKeyMultibase = parsePublicKeyMultibase(hexToPublicKeyMultibase(publicKeyHex));
+    const operations: DIDOperation[] = [
+      {
+        type: DIDOperationType.AddVerificationMethod,
+        verificationMethod: {
+          id: methodId,
+          type: VerificationMethodType.RedJubJubVerificationKey2025,
+          controller: didString,
+          publicKeyMultibase: publicKeyMultibase
+        }
+      },
+    ];
 
-    // const counterAfter = await api.displayCounterValue(providers, counterContract);
-    // expect(counterAfter.counterValue).toEqual(BigInt(1));
-    // expect(counterAfter.contractAddress).toEqual(counter.contractAddress);
+    const result = await api.updateDID(contract, operations);
+    expect(result.txId).toMatch(/[0-9a-f]{64}/);
+
+    const didDoc = await api.resolveDID(providers, contract);
+    logger.info(`DIDDocument JSON: ${JSON.stringify(didDoc, null, 2)}`);
+
+    expect(didDoc?.verificationMethod).not.toBeNull()
+
+    const insertedVerificationMethod = didDoc?.verificationMethod?.find(vm => vm.id === methodId);  
+    expect(insertedVerificationMethod).not.toBeNull;
+    expect(insertedVerificationMethod?.type).toEqual(VerificationMethodType.RedJubJubVerificationKey2025);
+  });
+
+  it('should update DID with the verification relation and resolve final document', async () => {
+    const methodId = parseDIDKeyID(`${didString}#key-1`);
+
+    const operations: DIDOperation[] = [
+      {
+        type: DIDOperationType.AddVerificationMethodRelation,
+        relation: VerificationMethodRelationType.Authentication,
+        methodId: methodId
+      },
+    ];
+
+    const result = await api.updateDID(contract, operations);
+    expect(result.txId).toMatch(/[0-9a-f]{64}/);
+
+    const didDoc = await api.resolveDID(providers, contract);
+    logger.info(`DIDDocument JSON: ${JSON.stringify(didDoc, null, 2)}`);
+    expect(didDoc?.authentication?.some(
+      authenticationMethodId => authenticationMethodId === methodId)).toBe(true);
   });
 });

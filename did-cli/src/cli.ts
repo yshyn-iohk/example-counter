@@ -22,7 +22,7 @@ import { type StartedDockerComposeEnvironment, type DockerComposeEnvironment } f
 import { type MidnightDIDProviders, type DeployedMidnightDIDContract } from './common-types';
 import { type Config, StandaloneConfig } from './config';
 import * as api from './api';
-import { createVerificationMethod, DIDOperation, hexToPublicKeyMultibase, parseDIDURL, VerificationMethodRelation, VerificationMethodType } from '@midnight-ntwrk/did-contract';
+import { createVerificationMethod, DIDOperation, hexToPublicKeyMultibase, parseContractAddress, parseDIDURL, VerificationMethodRelation, VerificationMethodType } from '@midnight-ntwrk/did-contract';
 import { 
   MidnightDID, 
   MidnightDIDString,
@@ -94,7 +94,8 @@ const updateDIDLoop = async (
   contract: DeployedMidnightDIDContract
 ): Promise<void> => {
   let pendingOperations: DIDOperation[] = [];
-  const didStr = createMidnightDIDString(contract.deployTxData.public.contractAddress, api.midnightNetwork);
+  const contractAddress = parseContractAddress(contract.deployTxData.public.contractAddress)
+  const didStr = createMidnightDIDString(contractAddress, api.midnightNetwork);
 
   while (true) {
     const choice = await rli.question(UPDATE_DID_QUESTIONS);

@@ -15,7 +15,7 @@
 
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
-import { type ContractAddress } from '@midnight-ntwrk/compact-runtime';
+import { CompactTypeVector, type ContractAddress, CompactType, CompactTypeField } from '@midnight-ntwrk/compact-runtime';
 import {
   MidnightDIDPrivateState,
   DIDContract,
@@ -27,6 +27,7 @@ import {
   DIDOperation,
   DIDOperationType,
   OperationBuilder,
+  parseContractAddress,
 } from '@midnight-ntwrk/did-contract';
 import { type CoinInfo, nativeToken, Transaction, type TransactionId } from '@midnight-ntwrk/ledger';
 import { deployContract, findDeployedContract } from '@midnight-ntwrk/midnight-js-contracts';
@@ -63,6 +64,8 @@ import * as fsAsync from 'node:fs/promises';
 import * as fs from 'node:fs';
 import { match } from 'node:assert';
 import { type Interface } from 'node:readline/promises';
+import { length } from 'zod/v4-mini';
+import { DIDUpdateOperation } from '@midnight-ntwrk/did-contract/dist/managed/did/contract/index.cjs';
 
 let logger: Logger;
 // Instead of setting globalThis.crypto which is read-only, we'll ensure crypto is available
@@ -82,7 +85,13 @@ export const getMidnightDIDLedgerState = async (
       ? DIDContract.ledger(contractState.data)
       : null)
     );
-  logger.info(`Ledger state: ${state}`);
+  logger.info(
+    JSON.stringify(
+      state ? state : null,
+      (key, value) => (typeof value === 'bigint' ? value.toString() : value),
+      2
+    )
+  );
   return state;
 };
 
@@ -140,7 +149,12 @@ export const updateDID = async (
   logger.info(`Updating DID at contract address: ${didContract.deployTxData.public.contractAddress}`);
 
   let ledgerOperations = OperationBuilder.padding(DIDDocumentToLedger.updateOperations(patches));
-  const finalizedTxData = await didContract.callTx.applyOperations(ledgerOperations);
+  const verifiedOperations = OperationBuilder.verifyOperations(ledgerOperations);
+  logger.info("Ledger operation lenght: " + ledgerOperations.length);
+
+  const ops: DIDUpdateOperation[] = [...ledgerOperations];
+
+  const finalizedTxData = await didContract.callTx.applyOperations(ops);
 
   logger.info(`Transaction ${finalizedTxData.public.txId} added in block ${finalizedTxData.public.blockHeight}`);
 
@@ -176,12 +190,14 @@ export const resolveDID = async (
   const midnightNetwork = RuntimeToDomain.NetworkMap[network];
 
   const contractAddress = didContract.deployTxData.public.contractAddress;
+  const midnightContractAddress = parseContractAddress(contractAddress);
   const didContractState = await getMidnightDIDLedgerState(providers, contractAddress);
   if (didContractState === null) {
     logger.info(`There is no Midnight DID contract deployed at ${contractAddress}.`);
     return null;
   } else {
-    let didDocument = LedgerToDIDDocument.ledgerStateToDIDDocument(didContractState, midnightNetwork);
+    let didDocument = LedgerToDIDDocument
+      .ledgerStateToDIDDocument(didContractState, midnightNetwork, midnightContractAddress);
     logger.info(
       `MidnightDID Document:
        ${didDocument}

@@ -19,7 +19,13 @@ import {
   VerificationMethodRelation as LedgerVerificationMethodRelation,
   VerificationMethodType as LedgerVerificationMethodType
 } from "./managed/did/contract/index.cjs";
-import { createMidnightDIDString, MidnightNetwork } from "./midnight-did";
+import { 
+    createMidnightDIDString, 
+    MidnightNetwork, 
+    parseContractAddress,
+    ContractAddress as MidnightContractAddress
+} from "./midnight-did";
+import { ContractAddress } from "@midnight-ntwrk/compact-runtime";
 
 //TODO: rename DIDDocument to Domain
 export class LedgerToDIDDocument {
@@ -60,13 +66,14 @@ export class LedgerToDIDDocument {
    */
   static ledgerStateToDIDDocument(
     ledger: Ledger,
-    network: MidnightNetwork
+    network: MidnightNetwork,
+    contractAddress: MidnightContractAddress
   ): DIDDocument {
     //TODO: replace the context with the real
     //TODO: think about the context for the new key type
     const MidnightDIDDocumentContext = Array.of("http://localhost/foo/bar");
 
-    const contractAddress = Buffer.from(ledger.id.bytes).toString("hex");
+    //const contractAddress = parseContractAddress(Buffer.from(ledger.id.bytes).toString("hex"));
 
     const did = createMidnightDIDString(contractAddress, network);
 
@@ -177,7 +184,7 @@ export class DIDDocumentToLedger {
   static undefinedVerificationMethod: LedgerVerificationMethod = {
     id: "",
     type: LedgerVerificationMethodType.Undefined,
-    publicKey: new Uint8Array(0)
+    publicKey: new Uint8Array(32)
   };
 
   //TODO: clarify with Midnight team how to init the default struct
@@ -262,16 +269,6 @@ export class DIDDocumentToLedger {
   static updateOperations(
     operations: Array<DIDOperation>
   ): Array<LedgerUpdateOperation> {
-    if (operations.length > 32) {
-      throw new Error("Maximum number of DID operations exceeded: 32");
-    }
-
-    const transformedOperations = operations.map((op) =>
-      this.updateOperation(op)
-    );
-    const padding = new Array(32 - transformedOperations.length).fill(
-      this.defaultLedgerUpdateOperation
-    );
-    return [...transformedOperations, ...padding];
+    return operations.map((op) => this.updateOperation(op));
   }
 }

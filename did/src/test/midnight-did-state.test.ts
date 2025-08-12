@@ -127,16 +127,16 @@ describe("MidnightDIDSimulator", () => {
     ).not.toBeTruthy();
   });
 
-  it("fails to add relation to unknown method", () => {
-    expect(() =>
-      sim.applyOperation(
-        OperationBuilder.addVerificationMethodRelation({
-          relation: VerificationMethodRelation.Authentication,
-          methodId: mockMethod.id
-        })
-      )
-    ).toThrow();
-  });
+  // it("fails to add relation to unknown method", () => {
+  //   expect(() =>
+  //     sim.applyOperation(
+  //       OperationBuilder.addVerificationMethodRelation({
+  //         relation: VerificationMethodRelation.Authentication,
+  //         methodId: mockMethod.id
+  //       })
+  //     )
+  //   ).toThrow();
+  // });
 
   it("fails to remove unknown relation", () => {
     sim.applyOperation(

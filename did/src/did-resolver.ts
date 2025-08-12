@@ -1,4 +1,4 @@
-import { DID, DIDDocument } from "./did-document";
+import { DIDString, DIDDocument } from "./did-document";
 
 /**
  * Domain interface for resolving a MidnightDID to a DIDDocument.
@@ -9,5 +9,5 @@ export interface MidnightDIDResolver {
    * @param did - the MidnightDID to resolve
    * @returns the resolved DIDDocument
    */
-  resolve(did: DID): Promise<DIDDocument>;
+  resolve(did: DIDString): Promise<DIDDocument>;
 }

@@ -12,19 +12,41 @@ export const DIDURLSchema = z
   .brand("DIDURL");
 export type DIDURL = z.infer<typeof DIDURLSchema>;
 
+export const KeyIDSchema = z
+  .string()
+  .check(
+    z.regex(/^[a-zA-Z0-9.\-_:%]+$/), // conservative URI fragment charset
+    z.minLength(1)
+  )
+  .brand("KeyID");
+
+export type KeyID = z.infer<typeof KeyIDSchema>;
+
+/** DID Key ID (e.g. did:example:123#key-1) */
+export const DIDKeyIDSchema = DIDURLSchema
+  .check(
+    z.refine((val) => {
+      const [_, fragment] = val.split("#");
+      return KeyIDSchema.safeParse(fragment).success;
+    }, "Invalid DID Key ID format: invalid or missing fragment")
+  )
+  .brand("DIDKeyID");
+
+export type DIDKeyID = z.infer<typeof DIDKeyIDSchema>;
+
 /** DID schema (no path/query/fragment) */
-export const DIDSchema = z
+export const DIDStringSchema = z
   .string()
   .check(
     z.startsWith("did:"),
     z.minLength(5),
     z.refine(
       (val) => val.split(":").length >= 3 && !/[/?#]/.test(val),
-      "Invalid DID format"
+      { error: "Invalid DID format" }
     )
   )
   .brand("DID");
-export type DID = z.infer<typeof DIDSchema>;
+export type DIDString = z.infer<typeof DIDStringSchema>;
 
 /** Multibase public key */
 export const PublicKeyMultibaseSchema = z
@@ -32,7 +54,7 @@ export const PublicKeyMultibaseSchema = z
   .check(
     z.minLength(2),
     z.regex(/^[0-9A-Za-z]/),
-    z.refine(() => true, "Invalid multibase format")
+    z.refine(() => true, { error: "Invalid multibase format" })
   )
   .brand("PublicKeyMultibase");
 export type PublicKeyMultibase = z.infer<typeof PublicKeyMultibaseSchema>;
@@ -47,9 +69,9 @@ export const VerificationMethodTypeSchema = z.enum(VerificationMethodType);
 
 /** Verification Method */
 export const VerificationMethodSchema = z.object({
-  id: DIDURLSchema,
+  id: DIDKeyIDSchema,
   type: VerificationMethodTypeSchema,
-  controller: DIDSchema,
+  controller: DIDStringSchema,
   publicKeyMultibase: PublicKeyMultibaseSchema
 });
 export type VerificationMethod = z.infer<typeof VerificationMethodSchema>;
@@ -90,9 +112,9 @@ export type Service = z.infer<typeof ServiceSchema>;
 /** DID Document */
 export const DIDDocumentSchema = z.looseObject({
   "@context": z.union([z.string(), z.array(z.string())]),
-  id: DIDSchema,
-  alsoKnownAs: z.nullish(z.array(DIDSchema)),
-  controller: z.nullish(z.union([DIDSchema, z.array(DIDSchema)])),
+  id: DIDStringSchema,
+  alsoKnownAs: z.nullish(z.array(DIDStringSchema)),
+  controller: z.nullish(z.union([DIDStringSchema, z.array(DIDStringSchema)])),
   verificationMethod: z.nullish(z.array(VerificationMethodSchema)),
   authentication: z.nullish(z.array(z.string())),
   assertionMethod: z.nullish(z.array(z.string())),
@@ -141,9 +163,12 @@ export type DIDResolutionResult = z.infer<typeof DIDResolutionResultSchema>;
 export const parseDIDDocument = (input: unknown) =>
   DIDDocumentSchema.parse(input);
 export const parseDIDURL = (input: unknown) => DIDURLSchema.parse(input);
-export const parseDID = (input: unknown) => DIDSchema.parse(input);
+export const parseDIDKeyID = (input: unknown) => DIDKeyIDSchema.parse(input);
+export const parseDID = (input: unknown) => DIDStringSchema.parse(input);
 export const parseVerificationMethod = (input: unknown) =>
   VerificationMethodSchema.parse(input);
+export const parsePublicKeyMultibase = (input: unknown) =>
+  PublicKeyMultibaseSchema.parse(input);
 export const parseService = (input: unknown) => ServiceSchema.parse(input);
 export const parseDIDResolutionResult = (input: unknown) =>
   DIDResolutionResultSchema.parse(input);

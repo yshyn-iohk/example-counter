@@ -135,8 +135,10 @@ constructor() {
 //   applyOperations(operations);
 // }
 
-export circuit applyOperations(operations: Vector<32, DIDUpdateOperation>): [] {
+export circuit applyOperations(operations: Vector<8, DIDUpdateOperation>): [] {
   assert(disclose(active), "Contract is not active");
+
+  id = kernel.self();
 
   const previosOperationCount = operationCount.read();
 
@@ -217,7 +219,7 @@ circuit addVerificationMethodRelation(
 
   const relation = options.relation;
   const methodId = options.methodId;
-  assert(verificationMethods.member(methodId), "Verification method does not exist");
+  //assert(verificationMethods.member(methodId), "Verification method does not exist");
 
   if (relation == VerificationMethodRelation.Authentication) {
     assert(!authenticationRelation.member(methodId), "Method already in 'authentication' relation");

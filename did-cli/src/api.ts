@@ -147,7 +147,7 @@ export const createDID = async (
   return didContract;
 };
 
-export const updateDID = async (
+export const update = async (
   didContract: DeployedMidnightDIDContract,
   patches: Array<DIDOperation>,
 ): Promise<FinalizedTxData> => {
@@ -157,8 +157,13 @@ export const updateDID = async (
 
   logger.info(`Updating DID at contract address: ${didContract.deployTxData.public.contractAddress}`);
 
-  let ledgerOperations = OperationBuilder.padding(DIDDocumentToLedger.updateOperations(patches));
-  const verifiedOperations = OperationBuilder.verifyOperations(ledgerOperations);
+  let ledgerOperations = DIDDocumentToLedger.updateOperations(patches);
+  logger.info("Ledger operations:");
+  ledgerOperations.map(lo => logger.info(JSON.stringify(lo)));
+
+  let ledgerOperationsWithPadding = OperationBuilder.padding(ledgerOperations);
+
+  const verifiedOperations = OperationBuilder.verifyOperations(ledgerOperationsWithPadding);
 
   logger.info("DIDUpdateOperations:")
   verifiedOperations.map(op => { 
@@ -194,7 +199,7 @@ export class RuntimeToDomain {
 
 export const midnightNetwork: MidnightNetwork = RuntimeToDomain.NetworkMap[getNetworkId()];
 
-export const resolveDID = async (
+export const resolve = async (
   providers: MidnightDIDProviders,
   didContract: DeployedMidnightDIDContract,
 ): Promise<DIDDocument | null> => {
@@ -210,11 +215,11 @@ export const resolveDID = async (
   } else {
     let didDocument = LedgerToDIDDocument
       .ledgerStateToDIDDocument(didContractState, midnightNetwork, midnightContractAddress);
-    logger.info(
-      `MidnightDID Document:
-       ${didDocument}
-       `);
-    return didDocument;
+    
+      logger.info(`MidnightDID Document:
+      ${JSON.stringify(didDocument)}`);
+    
+      return didDocument;
   }
 };
 

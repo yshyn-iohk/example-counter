@@ -59,7 +59,7 @@ const mainLoop = async (providers: MidnightDIDProviders, rli: Interface): Promis
       }
       case '2': {
         const contract = await findContractByAddress(providers, rli);
-        const didDocument = await api.resolveDID(providers, contract);
+        const didDocument = await api.resolve(providers, contract);
         if (didDocument != null)
           logger.info('DID resolved successfully.');
         else
@@ -136,7 +136,7 @@ const updateDIDLoop = async (
           logger.warn('No pending patches to publish. Please add operations first.');
         } else {
           try {
-            await api.updateDID(contract, pendingOperations);
+            await api.update(contract, pendingOperations);
             logger.info('Published patches to the DID contract successfully.');
             pendingOperations = [];
           } catch (e) {

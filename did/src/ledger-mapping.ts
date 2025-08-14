@@ -58,6 +58,30 @@ export class LedgerToDIDDocument {
       VerificationMethodRelationType.CapabilityDelegation
   };
 
+  static toJSON(ledger: Ledger): object {
+    return {
+      id: Buffer.from(ledger.id.bytes).toString("hex"),
+      version: Number(ledger.version.toString()),
+      active: ledger.active,
+      operationCount: Number(ledger.operationCount.toString()),
+      verificationMethods: Array.from(ledger.verificationMethods, ([id, method]) => ({
+        id,
+        type: method.type,
+        publicKey: Buffer.from(method.publicKey).toString("hex")
+      })),
+      authenticationRelation: Array.from(ledger.authenticationRelation),
+      assertionMethodRelation: Array.from(ledger.assertionMethodRelation),
+      keyAgreementRelation: Array.from(ledger.keyAgreementRelation),
+      capabilityInvocationRelation: Array.from(ledger.capabilityInvocationRelation),
+      capabilityDelegationRelation: Array.from(ledger.capabilityDelegationRelation),
+      services: Array.from(ledger.services, ([id, service]) => ({
+        id,
+        type: service.type,
+        serviceEndpoint: service.serviceEndpoint
+      }))
+    };
+  }
+
   /**
    * Converts a Ledger to a DIDDocument for the Midnight DID method.
    * @param did - MidnightDID associated with the ledger
@@ -77,15 +101,17 @@ export class LedgerToDIDDocument {
 
     const did = createMidnightDIDString(contractAddress, network);
 
-    const verificationMethod = Array.from(ledger.verificationMethods).map(
-      ([id, method]) =>
+    const verificationMethod = [];
+    for (const [id, method] of ledger.verificationMethods) {
+      verificationMethod.push(
         createVerificationMethod({
-          id: id,
+          id,
           type: LedgerToDIDDocument.VerificationMethodTypeMap[method.type],
           controller: did,
           publicKeyMultibase: bytesToPublicKeyMultibase(method.publicKey)
         })
-    );
+      );
+    }
 
     const assertionMethod = ledger.assertionMethodRelation.isEmpty()
       ? undefined

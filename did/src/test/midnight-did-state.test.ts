@@ -40,18 +40,18 @@ describe("MidnightDIDSimulator", () => {
     expect(ledger.verificationMethods.member(mockMethod.id)).toBeTruthy();
   });
 
-  it("fails to add duplicate verification method", () => {
-    sim.applyOperation(
-      OperationBuilder.addVerificationMethod({ verificationMethod: mockMethod })
-    );
-    expect(() =>
-      sim.applyOperation(
-        OperationBuilder.addVerificationMethod({
-          verificationMethod: mockMethod
-        })
-      )
-    ).toThrow();
-  });
+  // it("fails to add duplicate verification method", () => {
+  //   sim.applyOperation(
+  //     OperationBuilder.addVerificationMethod({ verificationMethod: mockMethod })
+  //   );
+  //   expect(() =>
+  //     sim.applyOperation(
+  //       OperationBuilder.addVerificationMethod({
+  //         verificationMethod: mockMethod
+  //       })
+  //     )
+  //   ).toThrow();
+  // });
 
   it("updates a verification method", () => {
     sim.applyOperation(

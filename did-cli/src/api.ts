@@ -65,7 +65,7 @@ import * as fs from 'node:fs';
 import { match } from 'node:assert';
 import { type Interface } from 'node:readline/promises';
 import { length } from 'zod/v4-mini';
-import { DIDUpdateOperation } from '@midnight-ntwrk/did-contract/dist/managed/did/contract/index.cjs';
+import { DIDUpdateOperation, ledger } from '@midnight-ntwrk/did-contract/dist/managed/did/contract/index.cjs';
 
 let logger: Logger;
 // Instead of setting globalThis.crypto which is read-only, we'll ensure crypto is available
@@ -85,13 +85,22 @@ export const getMidnightDIDLedgerState = async (
       ? DIDContract.ledger(contractState.data)
       : null)
     );
-  logger.info(
-    JSON.stringify(
-      state ? state : null,
-      (key, value) => (typeof value === 'bigint' ? value.toString() : value),
-      2
-    )
-  );
+    if (state != null || state != undefined)
+      logger.info(LedgerToDIDDocument.toJSON(state));
+  // logger.info(
+  //   JSON.stringify(
+  //     state ? state : null,
+  //     (key, value) => (typeof value === 'bigint' ? value.toString() : value),
+  //     2
+  //   )
+  // );
+
+  if (state != null && state?.verificationMethods != null) {
+    for (const [id, method] of state!.verificationMethods) {
+      logger.info(`VerificaitonMethod: id: ${id}, type: ${method.type}`);
+    };
+  };
+
   return state;
 };
 
@@ -150,11 +159,14 @@ export const updateDID = async (
 
   let ledgerOperations = OperationBuilder.padding(DIDDocumentToLedger.updateOperations(patches));
   const verifiedOperations = OperationBuilder.verifyOperations(ledgerOperations);
-  logger.info("Ledger operation lenght: " + ledgerOperations.length);
 
-  const ops: DIDUpdateOperation[] = [...ledgerOperations];
+  logger.info("DIDUpdateOperations:")
+  verifiedOperations.map(op => { 
+    if (op.operationType != DIDContract.OperationType.Undefined) 
+      logger.info(JSON.stringify(op));
+  });
 
-  const finalizedTxData = await didContract.callTx.applyOperations(ops);
+  const finalizedTxData = await didContract.callTx.applyOperations(verifiedOperations);
 
   logger.info(`Transaction ${finalizedTxData.public.txId} added in block ${finalizedTxData.public.blockHeight}`);
 

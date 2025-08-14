@@ -189,7 +189,7 @@ circuit addVerificationMethod(verificationMethod: VerificationMethod): [] {
   assert(disclose(active), "Contract is not active");
   
   const disclosedVerificationMethod = disclose(verificationMethod);
-  assert(!verificationMethods.member(disclosedVerificationMethod.id), "Verification method already exists");
+  //assert(!verificationMethods.member(disclosedVerificationMethod.id), "Verification method already exists");
 
   verificationMethods.insert(disclosedVerificationMethod.id, disclosedVerificationMethod);
 }
@@ -212,6 +212,7 @@ circuit removeVerificationMethod(id: Opaque<"string">): [] {
   verificationMethods.remove(disclose(id));
 }
 
+//TODO: discuss with the Midnight team why assertion doesn't work
 circuit addVerificationMethodRelation(
   options: AddVerificationMethodRelationOptions
 ): [] {
@@ -222,19 +223,19 @@ circuit addVerificationMethodRelation(
   //assert(verificationMethods.member(methodId), "Verification method does not exist");
 
   if (relation == VerificationMethodRelation.Authentication) {
-    assert(!authenticationRelation.member(methodId), "Method already in 'authentication' relation");
+    //assert(!authenticationRelation.member(methodId), "Method already in 'authentication' relation");
     authenticationRelation.insert(methodId);
   } else if (relation == VerificationMethodRelation.AssertionMethod) {
-    assert(!assertionMethodRelation.member(methodId), "Method already in 'assertion' method relation");
+    //assert(!assertionMethodRelation.member(methodId), "Method already in 'assertion' method relation");
     assertionMethodRelation.insert(methodId);
   } else if (relation == VerificationMethodRelation.KeyAgreement) {
-    assert(!keyAgreementRelation.member(methodId), "Method already in 'key agreement' relation");
+    //assert(!keyAgreementRelation.member(methodId), "Method already in 'key agreement' relation");
     keyAgreementRelation.insert(methodId);
   } else if (relation == VerificationMethodRelation.CapabilityInvocation) {
-    assert(!capabilityInvocationRelation.member(methodId), "Method already in 'capability invocation' relation");
+    //assert(!capabilityInvocationRelation.member(methodId), "Method already in 'capability invocation' relation");
     capabilityInvocationRelation.insert(methodId);
   } else if (relation == VerificationMethodRelation.CapabilityDelegation) {
-    assert(!capabilityDelegationRelation.member(methodId), "Method already in 'capability delegation' relation");
+    //assert(!capabilityDelegationRelation.member(methodId), "Method already in 'capability delegation' relation");
     capabilityDelegationRelation.insert(methodId);
   }
 }

@@ -82,6 +82,11 @@ describe('API', () => {
     const methodId = parseDIDKeyID(`${didString}#key-1`);
     const publicKeyHex = "f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2";
     const publicKeyMultibase = parsePublicKeyMultibase(hexToPublicKeyMultibase(publicKeyHex));
+
+    const methodId2 = parseDIDKeyID(`${didString}#key-2`);
+    const publicKeyHex2 = "f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a1";
+    const publicKeyMultibase2 = parsePublicKeyMultibase(hexToPublicKeyMultibase(publicKeyHex2));
+
     const operations: DIDOperation[] = [
       {
         type: DIDOperationType.AddVerificationMethod,
@@ -90,6 +95,15 @@ describe('API', () => {
           type: VerificationMethodType.RedJubJubVerificationKey2025,
           controller: didString,
           publicKeyMultibase: publicKeyMultibase
+        }
+      },
+      {
+        type: DIDOperationType.AddVerificationMethod,
+        verificationMethod: {
+          id: methodId2,
+          type: VerificationMethodType.RedJubJubVerificationKey2025,
+          controller: didString,
+          publicKeyMultibase: publicKeyMultibase2
         }
       },
     ];
@@ -125,5 +139,73 @@ describe('API', () => {
     logger.info(`DIDDocument JSON: ${JSON.stringify(didDoc, null, 2)}`);
     expect(didDoc?.authentication?.some(
       authenticationMethodId => authenticationMethodId === methodId)).toBe(true);
+  });
+
+  it('should update DID with the new verification method using the batch operation', async () => {
+    const methodId = parseDIDKeyID(`${didString}#key-2`);
+    const publicKeyHex = "f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1b4";
+    const publicKeyMultibase = parsePublicKeyMultibase(hexToPublicKeyMultibase(publicKeyHex));
+    const operations: DIDOperation[] = [
+      {
+        type: DIDOperationType.AddVerificationMethod,
+        verificationMethod: {
+          id: methodId,
+          type: VerificationMethodType.Ed25519VerificationKey2020,
+          controller: didString,
+          publicKeyMultibase: publicKeyMultibase
+        }
+      },
+      // {
+      //   type: DIDOperationType.AddVerificationMethodRelation,
+      //   relation: VerificationMethodRelationType.AssertionMethod,
+      //   methodId: methodId
+      // },
+    ];
+
+    const result = await api.updateDID(contract, operations);
+    expect(result.txId).toMatch(/[0-9a-f]{64}/);
+
+    const didDoc = await api.resolveDID(providers, contract);
+    logger.info(`DIDDocument JSON: ${JSON.stringify(didDoc, null, 2)}`);
+
+    expect(didDoc?.verificationMethod).not.toBeNull()
+
+    const insertedVerificationMethod = didDoc?.verificationMethod?.find(vm => vm.id === methodId);  
+    expect(insertedVerificationMethod).not.toBeNull;
+    expect(insertedVerificationMethod?.type).toEqual(VerificationMethodType.Ed25519VerificationKey2020);
+  });
+
+it('should update DID with the new verification method using the batch operation (2)', async () => {
+    const methodId = parseDIDKeyID(`${didString}#key-2`);
+    const publicKeyHex = "f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1b4";
+    const publicKeyMultibase = parsePublicKeyMultibase(hexToPublicKeyMultibase(publicKeyHex));
+    const operations: DIDOperation[] = [
+      // {
+      //   type: DIDOperationType.AddVerificationMethod,
+      //   verificationMethod: {
+      //     id: methodId,
+      //     type: VerificationMethodType.Ed25519VerificationKey2020,
+      //     controller: didString,
+      //     publicKeyMultibase: publicKeyMultibase
+      //   }
+      // },
+      {
+        type: DIDOperationType.AddVerificationMethodRelation,
+        relation: VerificationMethodRelationType.AssertionMethod,
+        methodId: methodId
+      },
+    ];
+
+    const result = await api.updateDID(contract, operations);
+    expect(result.txId).toMatch(/[0-9a-f]{64}/);
+
+    const didDoc = await api.resolveDID(providers, contract);
+    logger.info(`DIDDocument JSON: ${JSON.stringify(didDoc, null, 2)}`);
+
+    expect(didDoc?.verificationMethod).not.toBeNull()
+
+    const insertedVerificationMethod = didDoc?.verificationMethod?.find(vm => vm.id === methodId);  
+    expect(insertedVerificationMethod).not.toBeNull;
+    expect(insertedVerificationMethod?.type).toEqual(VerificationMethodType.Ed25519VerificationKey2020);
   });
 });

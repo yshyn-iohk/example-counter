@@ -38,7 +38,7 @@ export default defineConfig({
         statements: -269,
       },
     },
-    reporters: ['default', ['junit', { outputFile: 'reports/report.xml' }]],
+    reporters: ['verbose', ['junit', { outputFile: 'reports/report.xml' }]],
   },
   resolve: {
     extensions: ['.ts', '.js'],

@@ -149,11 +149,11 @@ export class OperationBuilder {
     if (operations.length > MAX_OPERATIONS) {
       throw new Error(`Cannot pad: input exceeds ${MAX_OPERATIONS} operations`);
     }
-    return operations.concat(
-      Array.from({ length: MAX_OPERATIONS - operations.length }, () =>
-        this.undefined()
-      )
-    );
+    const padded = [...operations];
+    while (padded.length < MAX_OPERATIONS) {
+      padded.push(this.undefined());
+    }
+    return padded;
   }
 
   static verifyOperations(operations: DIDUpdateOperation[]): DIDUpdateOperation[] {

@@ -1,4 +1,4 @@
-# Midnight DID Specification Draft v0.1
+# Midnight DID Specification Draft v0.2
 
 # Status of This Document
 
@@ -14,8 +14,16 @@ Switzerland
 
 Contact: <contact@imax.id>
 
+[Midnight Foundation](https://midnight.foundation)
+Contact: <contact@midnight.foundation>
+
+[Hyperledger Identus](https://identus.io)
+Contact: <contact@identus.io>
+
+
 ## Contributors:
 - Dennis Mittmann
+- Yurii Shynbuiev
 
 # Abstract
 
@@ -43,22 +51,25 @@ Midnight DID is a URI conforming to [IETF RFC 3986](https://www.ietf.org/rfc/rfc
 
 Midnight DID is generated in conformity with [W3C DIDs specification](https://www.w3.org/TR/did-core/).
 
-Midnight UID (specific-idstring) is conforming to [IETF RFC 4122](https://www.ietf.org/rfc/rfc4122.txt)
+Midnight specific-idstring is a unique identifier for each entity, and itis conforming to the Midnight smart-contract address value and the Midnight network address value
 
 The ABNF grammar used to generate the Midnight DID identifier is as follows:
 
 ```
-Midnight-did = did:midnight:specific-idstring
-specific-idstring = xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx
+midnight-did = "did:midnight:" network ":" specific-idstring
+network = "undeployed" | "devnet" | "testnet" | "mainnet"
+specific-idstring = 68HEXDIG
+```
 
+The regular expression for Midnight DID is as follows:
+```
+/^[0-9a-f]{68}$/
 ```
 
 Below is an example of a Midnight DID:
 
 ```
-
-did:midnight:d36d6f76-e463-4e48-a97e-908edaee6453
-
+did:midnight:undeployed:02007dd39c6606563dd043f06a94f60659b00d4d4ff6a65d2db4ddbc277956c13aa3
 ```
 
 ## 2.2. Midnight DID document properties
@@ -66,7 +77,6 @@ did:midnight:d36d6f76-e463-4e48-a97e-908edaee6453
 An Midnight DID document can have three distinct properties:
 
 - **created**: poperty with the Date when the document was created.
-- **registered**: poperty with the Date when the document was registered.
 - **update**: poperty with the Date when the document was updated.
 - **deactivated**: : poperty with the Date when the DID was deactivated.
 

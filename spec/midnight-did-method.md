@@ -279,15 +279,20 @@ Below is a specific example:
 
 # 4. DID operations
 
-All methods **SHOULD** include a property denoting the supported method which is executed against the current Midnight DID document. The property needs to specify a timestamp of the most recent change.
+The Midnight DID is an instance of the deployed smart contract.
+The published of the smart-contract is the DID Controller, who keeps the private keys accosiated with the corresponding smart-contract.
+
+All update operations are performed by executing the smart contract circuit of the corresponding smart contract.
+
+Due to the `compact` language limitations, the `datetime` is not supported inside of the circuit, so the correspodning `created`, `updated`, `deactivated` properties of the DID Document Metadata are managed outside of the smart contract circuit.
+
+The smart-contract circuit support batch update of the DID public data accociated with the smart contract.
 
 This part is derived directly from [W3C DID specification](https://www.w3.org/TR/did-core/#updated).
 
 ## 4.1. Create
 
-Creation of the DID including the private & public key pair is done **off chain** on a device controlled by the holder.
-Within the metadata of the DID document, a **created** property is added.
-Midnight DID can be automatically created without registration for each Midnight  address.
+Creation of the DID is a deployment of the corresponding smart-constract instance.
 
 ```json
 {
@@ -295,29 +300,16 @@ Midnight DID can be automatically created without registration for each Midnight
 }
 ```
 
-As part of the **creation** operation, the initial Midnight DID document will be written to blockchain ledger in order to register the DID.
-Within the metadata of the DID document, a **registered** property is added.
-
-```json
-{
-  "registered": "2019-06-30T12:00:00Z"
-}
-```
-
-The DID Document will be written to the Midnight  Blockchain as part of the transaction meta data.
-
 ## 4.2. Read
 
-1. The DID network identifier is "mainnet".
-2. A lookup in the Midnight Ledger Database will reveal the DID Document by the DID ID.
-3. Midnight provides a backend which provides a method called `didVerify` which will look up the DID Document in a copy of the Midnight Ledger on the connected Midnight node.
-4. To make sure the result returned by invoking the `didVerify` function is trustworthy, the client could ask a sufficient number of nodes and compare each node's return value.
+Reading of an Midnight DID Document is done by attaching to the corresponding smart-contract by the address in the Midnight DID in the network specified by the `network` segment of the DID ID.
+The smart contract public state contains all information required to reconstruct the DID Document.
 
 ## 4.3. Update
 
-Updating of an Midnight DID will generate new private & public key's and is done on a device controlled by the user.
-Updating an Midnight DID Document is done by making a transaction which contains the old DID and writes a new DID as part of the transaction metadata into the blockchain ledger.
-Within the metadata of the DID document, a **updated** property is added
+Updating the Midnight DID implies the DID Controller to call the smart-contract circuite with the corresponding DIDUpdateOperations.
+
+The value of the `updated` property is generated outside of the cirtuit.
 
 ```json
 {
@@ -327,8 +319,11 @@ Within the metadata of the DID document, a **updated** property is added
 
 ## 4.5. Deactivation
 
-Deactivating an Midnight DID Document is done by making a transaction which contains the old DID and writes a new DID as part of the transaction metadata into the blockchain ledger.
-Within the metadata of the DID document, a **deactivation** property is added.
+Deactivating an Midnight DID Document is done by the DID Controller, who call the smart-contract circuite with the corresponding DIDDeactivationOperations.
+
+The value of the `deactivated` property is generated outside of the circuite.
+
+After `deativation` the DID cannot be updated anymore, but the state of the DID Document is preserved for data consistency and can be read by others.
 
 ```json
 {

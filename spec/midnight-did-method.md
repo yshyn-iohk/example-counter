@@ -93,7 +93,7 @@ Below is the basic structure of the Midnight DID Document:
 ```json
 {
   "context": ["https://www.w3.org/ns/did/v1"],
-  "id": "did:midnight:mainnet:02007dd39c6606563dd043f06a94f60659b00d4d4ff6a65d2db4ddbc277956c13aa3",
+  "id": "did:midnight:undeployed:02007dd39c6606563dd043f06a94f60659b00d4d4ff6a65d2db4ddbc277956c13aa3",
   "verificationMethod": [
     {
       "id": "did:midnight:undeployed:02007dd39c6606563dd043f06a94f60659b00d4d4ff6a65d2db4ddbc277956c13aa3#key-1",
@@ -139,7 +139,7 @@ The value of `id` **MUST** be a valid Midnight DID. A Midnight DID **MUST** have
 
 ```json
 {
-  "id": "did:midnight:d36d6f76-e463-4e48-a97e-908edaee6453"
+  "id": "did:midnight:undeployed:02007dd39c6606563dd043f06a94f60659b00d4d4ff6a65d2db4ddbc277956c13aa3"
 }
 ```
 

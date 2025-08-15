@@ -1,7 +1,7 @@
 services:
   proof-server:
     container_name: 'counter-proof-server'
-    image: "midnightnetwork/proof-server:4.0.0"
+    image: "proof-server-bootstrap-test:4.0.0"
     ports:
       - "6300"
     environment:
@@ -30,6 +30,7 @@ services:
       interval: 2s
       timeout: 5s
       retries: 5
-      start_period: 40s
+      start_period: 10s
     environment:
       CFG_PRESET: "dev"
+

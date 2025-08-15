@@ -99,7 +99,11 @@ Below is the basic structure of the Midnight DID Document:
       "id": "did:midnight:undeployed:02007dd39c6606563dd043f06a94f60659b00d4d4ff6a65d2db4ddbc277956c13aa3#key-1",
       "type": "Ed25519VerificationKey2020",
       "controller": "did:midnight:undeployed:02007dd39c6606563dd043f06a94f60659b00d4d4ff6a65d2db4ddbc277956c13aa3",
-      "publicKeyMultibase": "ff1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2"
+      "publicKeyJwk2020": {
+        "kty": "OKP",
+        "crv": "Ed25519",
+        "x": "VCpo2LMLhn6iWku8MKvSLg2ZAoC-nlOyPVQaO3FxVeQ"
+      }
     }
   ],
   "authentication": [
@@ -119,13 +123,19 @@ Below is the basic structure of the Midnight DID Document:
 
 Midnight DID document's **MUST** include a `@context` property.
 
-The value of the @context property **MUST** be one or more URIs, where the value of the first URI **MUST** be [https://www.w3.org/ns/did/v1](https://www.w3.org/ns/did/v1). For more information, see [W3C DID specification](https://w3c.github.io/did-core/#production-0).
+The value of the @context property **MUST** be an array of the following URIs, in order, where the value of the first URI **MUST** be [https://www.w3.org/ns/did/v1](https://www.w3.org/ns/did/v1), as the reference to the context of the DID Core specification v1; and the second one **MUST** be [https://w3c.github.io/vc-jws-2020/contexts/v1](https://w3c.github.io/vc-jws-2020/contexts/v1/), as the reference to the context of the `publicKeyJwk2020` specification v1; and the third one **MUST** be [https://w3id.org/security/suites/ed25519-2020/v1](https://w3id.org/security/suites/ed25519-2020/v1), as the reference to the `publicKeyMultibase`.
+
+For more information, see [W3C DID specification](https://w3c.github.io/did-core/#production-0).
 
 Below is an example in which the `@context` property has two values:
 
 ```json
 {
-  "@context": ["https://www.w3.org/ns/did/v1"]
+  "@context": [
+    "https://www.w3.org/ns/did/v1", 
+    "https://w3c.github.io/vc-jws-2020/contexts/v1", 
+    "https://w3id.org/security/suites/ed25519-2020/v1"
+    ]
 }
 ```
 
@@ -145,7 +155,7 @@ The value of `id` **MUST** be a valid Midnight DID. A Midnight DID **MUST** have
 
 ## 3.1. Verification Methods
 
-An Midnight DID Document **MAY** include a `verificationMethod` property to specify a set of public keys linked to that Midnight DID.
+An Midnight DID Document **MUST** include a `verificationMethod` property to specify a set of public keys linked to that Midnight DID.
 
 Public and private key pairs can be used for the identity management, authorization, and verification of Midnight DID's. A Midnight DID can be linked to multiple public and private key pairs, and one pair of public and private keys can also be used to manage multiple Midnight DID's.
 
@@ -155,11 +165,25 @@ Each linked public key has its own identifier specified using the field `id`. Th
 
 Bound public keys can be revoked. Revoked public keys **MUST NOT** be reactivated, but can still possess the original `id`.
 
-The value of the `type` field represents the corresponding public key type. Midnight DID document's support `BIP32-Ed25519`.
+The value of the `type` field represents the corresponding public key type. Midnight DID document's support `Ed25519VerificationKey`, `X25519KeyAgreementKey`, `JubJubVerificationKey`.
 
 The value of the `controller` field which identifies the controller of the corresponding private key **MUST** be a valid Midnight DID, implying that the public key is controlled by this Midnight DID.
 
-The encoding formats that Midnight DID Documents support include `publicKeyHex` and `AdaAddress`. Public keys of all types **MUST** be expressed in these two formats.
+The encoding formats that Midnight DID Documents support `publicKeyJwk2020` and  `publicKeyMultibase`. 
+Public keys of all types **MUST** be expressed in one of these two formats.
+
+**NOTE**:
+---
+Officially the `blockchainAccountId` property is deprecated.
+It's not a part of the DID Core spec and is mentioned in the extensions.
+[Here](https://www.w3.org/2025/credentials/vcdi/vocab/v2/vocabulary.html#blockchainAccountId) and [here](https://w3c-ccg.github.io/security-vocab/#blockchainAccountId).
+If we need to add the reference to the account id, we need to follow the [CAIP](https://github.com/ChainAgnostic/CAIPs/blob/main/CAIPs/caip-10.md) spec.
+But, the Midnight DID identifier, is a smart-contract by nature, and it can behave as an account id.
+---
+
+The `verificationMethod` **MAY** include the reference to the blockchain account id associated with the verification method.
+The value of the `blockchainAccountId` field **MUST** be a valid address in the blockchain.
+
 
 Below is a specific example of the `verificationMethod` property:
 
@@ -167,16 +191,20 @@ Below is a specific example of the `verificationMethod` property:
 {
   "verificationMethod": [
     {
-      "id": "did:midnight:d36d6f76-e463-4e48-a97e-908edaee6453#keys-1",
-      "type": "BIP32-Ed25519",
-      "controller": "did:midnight:d36d6f76-e463-4e48-a97e-908edaee6453",
-      "publicKeyMultibase": "0xfbf38de9fb40edcdab412094d24fa39a314f3d3f52f5860e2509c32522eda30161fe70dfc9f90434d64bd976ede4f112d4f2d8e34d28fe48281663219d2ddac6"
+      "id": "did:midnight:undeployed:02007dd39c6606563dd043f06a94f60659b00d4d4ff6a65d2db4ddbc277956c13aa3#keys-1",
+      "type": "Ed25519VerificationKey",
+      "controller": "did:midnight:undeployed:02007dd39c6606563dd043f06a94f60659b00d4d4ff6a65d2db4ddbc277956c13aa3",
+      "publicKeyJwk2020": {
+        "kty": "OKP",
+        "crv": "Ed25519",
+        "x": "VCpo2LMLhn6iWku8MKvSLg2ZAoC-nlOyPVQaO3FxVeQ"
+      }
     },
     {
-      "id": "did:midnight:d36d6f76-e463-4e48-a97e-908edaee6453#keys-1",
-      "type": "BIP32-Ed25519",
-      "controller": "did:midnight:d36d6f76-e463-4e48-a97e-908edaee6453",
-      "AdaAddress": "addr1qxjq9aj8hy29jkp9dxeepe88ksayl4kqw7qe8et33j6ucxmj2ldj3f0f2l3xrk8ep7hwvde3wa8l9w4wkp8wxfshta2sya6pxt"
+      "id": "did:midnight:undeployed:02007dd39c6606563dd043f06a94f60659b00d4d4ff6a65d2db4ddbc277956c13aa3#keys-1",
+      "type": "Ed25519VerificationKey",
+      "controller": "did:midnight:undeployed:02007dd39c6606563dd043f06a94f60659b00d4d4ff6a65d2db4ddbc277956c13aa3",
+      "publicKeyMultibase": "z6Mki8X9xk2Yz4oYzFZ8YsMLzYGoVrAjPLgWXYQjBq8k2vC2P"
     }
   ]
 }

@@ -46,10 +46,26 @@ export enum VerificationMethodRelation {
   CapabilityDelegation
 }
 
+export enum KeyType {
+  EC, 
+  OKP
+}
+
+export enum CurveType {
+  Ed25519, 
+  JubJub
+}
+
+export PublicKey {
+  kty: KeyType,
+  crv: CurveType,
+  crvPoint: CurvePoint, //(x: bigint, y: bigint)
+}
+
 export struct VerificationMethod {
   id: Opaque<"string">,
   type: VerificationMethodType,
-  publicKey: Bytes<32>,
+  publicKey: PublicKey,
 };
 
 export struct Service {

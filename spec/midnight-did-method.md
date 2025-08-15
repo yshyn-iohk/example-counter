@@ -212,11 +212,11 @@ Below is a specific example of the `verificationMethod` property:
 
 ## 3.2. Authentication
 
-Midnight DID Documents **SHOULD** include an `authentication` property to specify a set of verification methods.
+Midnight DID Documents **SHOULD** include an `authentication` property to specify a set of references to verification methods.
 
 A Midnight DID subject could add the `authentication` property in its corresponding Midnight DID Document to denote that the subject has authorized a set of verification methods for the purpose of authentication.
 
-The associated value **MUST** be an ordered set of one or more verification methods. Each verification methods in the `authentication` property **MAY** be embedded or referenced.
+The associated value **MUST** be an ordered set of one or more verification method references.
 
 Below is an example which refers to authentication keys in the two-way specified above:
 
@@ -224,14 +224,9 @@ Below is an example which refers to authentication keys in the two-way specified
 {
   ...
   "authentication": [
-  "did:midnight:d36d6f76-e463-4e48-a97e-908edaee6453#keys-1",
-  {
-    "id": "did:midnight:d36d6f76-e463-4e48-a97e-908edaee6453#keys-2",
-    "type": "BIP32-Ed25519",
-    "controller": "did:midnight:d36d6f76-e463-4e48-a97e-908edaee6453",
-    "publicKeyMultibase": "03a835599850544b4c0a222d594be5d59cf298f5a3fd90bff1c8caa064523745f3"
-  }
-  ],
+  "did:midnight:undeployed:02007dd39c6606563dd043f06a94f60659b00d4d4ff6a65d2db4ddbc277956c13aa3#key-1",
+  ]
+  ...
 }
 ```
 
@@ -247,15 +242,12 @@ It is worth noting that a Midnight DID Document can assign `controller` without 
 
 The Midnight DID Document of the delegate **SHOULD** have a `authentication` property.
 
-Below is a specific example representing that either `did:midnight:5Ee76017be7F983a520a778B413758A9DB49cBe9` or `did:midnight:9861eE37Ede3dCab070DF227155D86A7438d8Ed2` can act as a delegate of `did:midnight:d36d6f76-e463-4e48-a97e-908edaee6453`:
-
 ```json
 {
   ...
-  "id": "did:midnight:d36d6f76-e463-4e48-a97e-908edaee6453",
+  "id": "did:midnight:undeployed:02007dd39c6606563dd043f06a94f60659b00d4d4ff6a65d2db4ddbc277956c13aa3",
   "controller": [
-    "did:midnight:5Ee76017be7F983a520a778B413758A9DB49cBe9",
-    "did:midnight:9861eE37Ede3dCab070DF227155D86A7438d8Ed2"
+    "did:midnight:undeployed:02007dd39c6606563dd043f06a94f60659b00d4d4ff6a65d2db4ddbc277956c13aa3"
   ],
 }
 ```
@@ -266,6 +258,8 @@ Midnight DID document's use an **OPTIONAL** `service` property to specify the se
 
 Midnight DID's allow entities to add services and specify the relevant information of a service that is related to the particular Midnight DID, including fields such as the type of service and service endpoint.
 
+Each `id` property in the `service ` array **MUST** be unique within the `service` array.
+
 This part is derived directly from [W3C DID specification](https://www.w3.org/TR/did-core/#services).
 
 Below is a specific example:
@@ -275,7 +269,7 @@ Below is a specific example:
   ...
   "service": [
   {
-    "id": "did:midnight:d36d6f76-e463-4e48-a97e-908edaee6453#some-service",
+    "id": "did-commDIDCommV2",
     "type": "SomeServiceType",
     "serviceEndpoint": "Some URL"
   }

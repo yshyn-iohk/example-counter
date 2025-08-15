@@ -77,28 +77,41 @@ did:midnight:undeployed:02007dd39c6606563dd043f06a94f60659b00d4d4ff6a65d2db4ddbc
 An Midnight DID document can have three distinct properties:
 
 - **created**: poperty with the Date when the document was created.
-- **update**: poperty with the Date when the document was updated.
+- **updated**: poperty with the Date when the document was updated.
 - **deactivated**: : poperty with the Date when the DID was deactivated.
 
 A deactivated Midnight DID can no longer be used and cannot be reactivated for use.
 
+All properties are conformed with the DID Core specification [DID Document Metadata](https://www.w3.org/TR/did-1.0/#did-document-metadata)
+
 ## 2.3. Midnight DID Document
 
-Each Midnight DID will have a corresponding Midnight DID Document, which is a set of data describing this Midnight DID.
+Each Midnight DID will have a corresponding Midnight DID Document, which is a set of data describing this Midnight DID according to the DID Core v1.0 specification.
 
 Below is the basic structure of the Midnight DID Document:
 
 ```json
 {
   "context": ["https://www.w3.org/ns/did/v1"],
-  "id": "did:midnight:d36d6f76-e463-4e48-a97e-908edaee6453",
-  "authentication": {
-    "id": "",
-    "type": "",
-    "controller": "",
-    "publicKeyMultibase": ""
-  },
-  "credentials": []
+  "id": "did:midnight:mainnet:02007dd39c6606563dd043f06a94f60659b00d4d4ff6a65d2db4ddbc277956c13aa3",
+  "verificationMethod": [
+    {
+      "id": "did:midnight:undeployed:02007dd39c6606563dd043f06a94f60659b00d4d4ff6a65d2db4ddbc277956c13aa3#key-1",
+      "type": "Ed25519VerificationKey2020",
+      "controller": "did:midnight:undeployed:02007dd39c6606563dd043f06a94f60659b00d4d4ff6a65d2db4ddbc277956c13aa3",
+      "publicKeyMultibase": "ff1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2"
+    }
+  ],
+  "authentication": [
+    "did:midnight:undeployed:02007dd39c6606563dd043f06a94f60659b00d4d4ff6a65d2db4ddbc277956c13aa3#key-1"
+  ],
+  "assertionMethod": [
+    "did:midnight:undeployed:02007dd39c6606563dd043f06a94f60659b00d4d4ff6a65d2db4ddbc277956c13aa3#key-1"
+  ],
+  "keyAgreement": []],
+  "capabilityInvocation": [],
+  "capabilityDelegation": [],
+  "service": []
 }
 ```
 

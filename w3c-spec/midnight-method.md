@@ -51,7 +51,7 @@ Midnight DID is a URI conforming to [IETF RFC 3986](https://www.ietf.org/rfc/rfc
 
 Midnight DID is generated in conformity with [W3C DIDs specification](https://www.w3.org/TR/did-core/).
 
-Midnight specific-idstring is a unique identifier for each entity, and itis conforming to the Midnight smart-contract address value and the Midnight network address value
+The `specific-idstring` in a Midnight DID is a unique identifier for each entity. It conforms to the structure of a Midnight smart contract address and network segment.
 
 The ABNF grammar used to generate the Midnight DID identifier is as follows:
 
@@ -76,11 +76,11 @@ did:midnight:undeployed:02007dd39c6606563dd043f06a94f60659b00d4d4ff6a65d2db4ddbc
 
 An Midnight DID document can have three distinct properties:
 
-- **created**: poperty with the Date when the document was created.
-- **updated**: poperty with the Date when the document was updated.
-- **deactivated**: : poperty with the Date when the DID was deactivated.
+- **created**: property with the Date when the document was created.
+- **updated**: property with the Date when the document was updated.
+- **deactivated**: property with the Date when the DID was deactivated.
 
-A deactivated Midnight DID can no longer be used and cannot be reactivated for use.
+A deactivated Midnight DID can no longer be used or reactivated.
 
 All properties are conformed with the DID Core specification [DID Document Metadata](https://www.w3.org/TR/did-1.0/#did-document-metadata)
 
@@ -121,13 +121,16 @@ Below is the basic structure of the Midnight DID Document:
 
 ## 2.4. Context
 
-Midnight DID document's **MUST** include a `@context` property.
+A Midnight DID document **MUST** include a `@context` property.
 
-The value of the @context property **MUST** be an array of the following URIs, in order, where the value of the first URI **MUST** be [https://www.w3.org/ns/did/v1](https://www.w3.org/ns/did/v1), as the reference to the context of the DID Core specification v1; and the second one **MUST** be [https://w3c.github.io/vc-jws-2020/contexts/v1](https://w3c.github.io/vc-jws-2020/contexts/v1/), as the reference to the context of the `publicKeyJwk2020` specification v1; and the third one **MUST** be [https://w3id.org/security/suites/ed25519-2020/v1](https://w3id.org/security/suites/ed25519-2020/v1), as the reference to the `publicKeyMultibase`.
+The value of the `@context` property **MUST** be an array containing the following URIs, in order:
+1. `https://www.w3.org/ns/did/v1` (reference to the context of the DID Core specification v1)
+2. `https://w3c.github.io/vc-jws-2020/contexts/v1` (reference to the context of the `publicKeyJwk2020` specification v1)
+3. `https://w3id.org/security/suites/ed25519-2020/v1` (reference to the `publicKeyMultibase` specification)
 
 For more information, see [W3C DID specification](https://w3c.github.io/did-core/#production-0).
 
-Below is an example in which the `@context` property has two values:
+Below is an example in which the `@context` property has these values:
 
 ```json
 {
@@ -169,7 +172,7 @@ The value of the `type` field represents the corresponding public key type. Midn
 
 The value of the `controller` field which identifies the controller of the corresponding private key **MUST** be a valid Midnight DID, implying that the public key is controlled by this Midnight DID.
 
-The encoding formats that Midnight DID Documents support `publicKeyJwk2020` and  `publicKeyMultibase`. 
+Midnight DID Documents support the encoding formats `publicKeyJwk2020` and `publicKeyMultibase`.
 Public keys of all types **MUST** be expressed in one of these two formats.
 
 **NOTE**:
@@ -280,19 +283,19 @@ Below is a specific example:
 # 4. DID operations
 
 The Midnight DID is an instance of the deployed smart contract.
-The published of the smart-contract is the DID Controller, who keeps the private keys accosiated with the corresponding smart-contract.
+The publisher of the smart contract is the DID Controller, who keeps the private keys associated with the corresponding smart contract.
 
 All update operations are performed by executing the smart contract circuit of the corresponding smart contract.
 
-Due to the `compact` language limitations, the `datetime` is not supported inside of the circuit, so the correspodning `created`, `updated`, `deactivated` properties of the DID Document Metadata are managed outside of the smart contract circuit.
+Due to the `compact` language limitations, the `datetime` is not supported inside of the circuit, so the corresponding `created`, `updated`, `deactivated` properties of the DID Document Metadata are managed outside of the smart contract circuit.
 
-The smart-contract circuit support batch update of the DID public data accociated with the smart contract.
+The smart contract circuit supports batch updates of the DID public data associated with the smart contract.
 
 This part is derived directly from [W3C DID specification](https://www.w3.org/TR/did-core/#updated).
 
 ## 4.1. Create
 
-Creation of the DID is a deployment of the corresponding smart-constract instance.
+Creating a DID involves deploying the corresponding smart contract instance.
 
 ```json
 {
@@ -302,14 +305,14 @@ Creation of the DID is a deployment of the corresponding smart-constract instanc
 
 ## 4.2. Read
 
-Reading of an Midnight DID Document is done by attaching to the corresponding smart-contract by the address in the Midnight DID in the network specified by the `network` segment of the DID ID.
+Reading of a Midnight DID Document is done by attaching to the corresponding smart contract by the address in the Midnight DID in the network specified by the `network` segment of the DID ID.
 The smart contract public state contains all information required to reconstruct the DID Document.
 
 ## 4.3. Update
 
-Updating the Midnight DID implies the DID Controller to call the smart-contract circuite with the corresponding DIDUpdateOperations.
+Updating the Midnight DID implies the DID Controller calls the smart contract circuit with the corresponding DIDUpdateOperations.
 
-The value of the `updated` property is generated outside of the cirtuit.
+The value of the `updated` property is generated outside of the circuit.
 
 ```json
 {
@@ -319,11 +322,11 @@ The value of the `updated` property is generated outside of the cirtuit.
 
 ## 4.5. Deactivation
 
-Deactivating an Midnight DID Document is done by the DID Controller, who call the smart-contract circuite with the corresponding DIDDeactivationOperations.
+Deactivating a Midnight DID Document is done by the DID Controller, who calls the smart contract circuit with the corresponding DIDDeactivationOperations.
 
-The value of the `deactivated` property is generated outside of the circuite.
+The value of the `deactivated` property is generated outside of the circuit.
 
-After `deativation` the DID cannot be updated anymore, but the state of the DID Document is preserved for data consistency and can be read by others.
+After `deactivation` the DID cannot be updated anymore, but the state of the DID Document is preserved for data consistency and can be read by others.
 
 ```json
 {
@@ -373,11 +376,11 @@ Therefore, Midnight DID document will **NEVER** contain any personal Data.
 
 ## 6.3. Separation of concerns
 
-DID's beeing purpose build, which means the holder will control several DID's for distinct Use Cases.
+DIDs are purpose-built, which means the holder will control several DIDs for distinct use cases.
 
 ## 6.4. Traceability
 
-To avoid traceability of a verifiable presentation, a new did document **can** be generated of during the generation of each verifiable presentation. For each new DID document, a new privat-public key pair can be generated. This avoids correlation-based tracing of the user.
+To avoid traceability of a verifiable presentation, a new DID Document **can** be generated during the creation of each verifiable presentation. For each new DID document, a new private-public key pair can be generated. This avoids correlation-based tracing of the user.
 
 ## 6.5. Misattribution
 

@@ -112,7 +112,7 @@ Below is the basic structure of the Midnight DID Document:
   "assertionMethod": [
     "did:midnight:undeployed:02007dd39c6606563dd043f06a94f60659b00d4d4ff6a65d2db4ddbc277956c13aa3#key-1"
   ],
-  "keyAgreement": []],
+  "keyAgreement": [],
   "capabilityInvocation": [],
   "capabilityDelegation": [],
   "service": []

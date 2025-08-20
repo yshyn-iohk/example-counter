@@ -13,11 +13,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { createLogger } from './logger-utils.js';
+import path from 'node:path';
+
+import { DockerComposeEnvironment, Wait } from 'testcontainers';
+
 import { run } from './cli.js';
 import { currentDir, TestnetRemoteConfig } from './config.js';
-import { DockerComposeEnvironment, Wait } from 'testcontainers';
-import path from 'node:path';
+import { createLogger } from './logger-utils.js';
 
 const config = new TestnetRemoteConfig();
 const dockerEnv = new DockerComposeEnvironment(

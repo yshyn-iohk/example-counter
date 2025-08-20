@@ -13,11 +13,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { createLogger } from './logger-utils.js';
 import path from 'node:path';
-import { run } from './cli.js';
+
 import { DockerComposeEnvironment, Wait } from 'testcontainers';
+
+import { run } from './cli.js';
 import { currentDir, StandaloneConfig } from './config.js';
+import { createLogger } from './logger-utils.js';
 
 const config = new StandaloneConfig();
 const dockerEnv = new DockerComposeEnvironment(path.resolve(currentDir, '..'), 'standalone.yml')

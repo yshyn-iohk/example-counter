@@ -13,9 +13,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { createLogger } from './logger-utils.js';
 import { run } from './cli.js';
 import { TestnetRemoteConfig } from './config.js';
+import { createLogger } from './logger-utils.js';
 
 const config = new TestnetRemoteConfig();
 const logger = await createLogger(config.logDir);

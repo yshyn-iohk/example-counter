@@ -20,7 +20,7 @@ export type MidnightDIDPrivateState = {
 };
 
 export const witnesses = {
-  getEpoch() {
-    return Date.now();
-  }
+  // getEpoch() {
+  //   return Date.now();
+  // }
 };

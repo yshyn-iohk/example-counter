@@ -33,6 +33,7 @@ export ledger capabilityDelegationRelation: Set<Opaque<"string">>;
 export ledger services: Map<Opaque<"string">, Service>;
 
 witness local_secret_key(): Bytes<32>;
+witness getEpoc(): Uint<64>;
 
 export enum VerificationMethodType {
   Undefined,
@@ -144,7 +145,8 @@ constructor() {
   //TODO: clarify with the Midnight team why `id` is not set correctly (did.api.test.ts)
   id = kernel.self();
   active = true;
-  //createdAt = witnesses.getEpoc();
+
+  //createdAt = disclose(getEpoc());
 }
 
 //TODO: clarify with Midnight team how to find/deploy the smart contract with args

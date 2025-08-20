@@ -13,34 +13,39 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import {
+  ContractAddress as MidnightContractAddress,
+  createMidnightDIDString,
+  CurveType,
+  DIDOperation,
+  DIDOperationType,
+  DIDStringSchema,
+  hexToPublicKeyMultibase,
+  KeyType,
+  MidnightDIDSchema,
+  MidnightDIDString,
+  OperationBuilder,
+  parseContractAddress,
+  parseDIDKeyID,
+  parseDIDURL,
+  parseMidnightDID,
+  parseMidnightDIDString,
+  parsePublicKeyMultibase,
+  VerificationMethodRelation,
+  VerificationMethodRelationType,
+  VerificationMethodType,
+} from '@midnight-ntwrk/did-contract';
 import { type Resource } from '@midnight-ntwrk/wallet';
 import { type Wallet } from '@midnight-ntwrk/wallet-api';
+import { log } from 'console';
 import path from 'path';
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+
 import * as api from '../api';
 import { DeployedMidnightDIDContract, MidnightDIDContract, type MidnightDIDProviders } from '../common-types';
-import { 
-  DIDOperation, 
-  DIDOperationType, 
-  MidnightDIDString, 
-  parseDIDURL, 
-  createMidnightDIDString, 
-  VerificationMethodType, 
-  parsePublicKeyMultibase, 
-  parseDIDKeyID, 
-  VerificationMethodRelation, 
-  VerificationMethodRelationType, 
-  parseContractAddress, 
-  hexToPublicKeyMultibase, 
-  OperationBuilder, DIDStringSchema, 
-  MidnightDIDSchema, parseMidnightDIDString,
-  parseMidnightDID,
-  ContractAddress as MidnightContractAddress 
-} from '@midnight-ntwrk/did-contract';
 import { currentDir } from '../config';
-import { createLogger } from '../logger-utils';
+import { BigIntReplacer, createLogger } from '../logger-utils';
 import { TestEnvironment } from './commons';
-import { describe, it, expect, beforeAll, afterAll } from 'vitest';
-import { log } from 'console';
 
 const logDir = path.resolve(currentDir, '..', 'logs', 'tests', `${new Date().toISOString()}.log`);
 const logger = await createLogger(logDir);
@@ -61,7 +66,7 @@ describe('Midnight DID', () => {
       wallet = await testEnvironment.getWallet();
       providers = await api.configureProviders(wallet, testConfiguration.dappConfig);
     },
-    1000 * 60 * 45 *  10,
+    1000 * 60 * 45 * 10,
   );
 
   afterAll(async () => {
@@ -90,31 +95,31 @@ describe('Midnight DID', () => {
   });
 
   it('should contain the reference to the DID Core specificaiton 1.0', async () => {
-      const didDoc = await api.resolve(providers, contract);
+    const didDoc = await api.resolve(providers, contract);
 
-      expect(didDoc).toBeTruthy;
-      expect(didDoc?.['@context']).toBeInstanceOf(Array);
-      expect(didDoc?.['@context'][0]).toBe("https://www.w3.org/ns/did/v1");
+    expect(didDoc).toBeTruthy;
+    expect(didDoc?.['@context']).toBeInstanceOf(Array);
+    expect(didDoc?.['@context'][0]).toBe('https://www.w3.org/ns/did/v1');
   });
 
   it('should contain the `id` property matching the pattern: `did:midnight<network_id>:<contract_address>`', async () => {
-      const didDoc = await api.resolve(providers, contract);
+    const didDoc = await api.resolve(providers, contract);
 
-      expect(didDoc).toBeTruthy;
-      expect(typeof didDoc?.id).toBe('string');
-      expect(() => DIDStringSchema.parse(didDoc?.id)).not.toThrow();
-      expect(() => MidnightDIDSchema.parse(didDoc?.id)).not.toThrow();
+    expect(didDoc).toBeTruthy;
+    expect(typeof didDoc?.id).toBe('string');
+    expect(() => DIDStringSchema.parse(didDoc?.id)).not.toThrow();
+    expect(() => MidnightDIDSchema.parse(didDoc?.id)).not.toThrow();
 
-      const midnightDIDString = parseMidnightDIDString(didDoc?.id);
-      const midnightDID = parseMidnightDID(midnightDIDString);
+    const midnightDIDString = parseMidnightDIDString(didDoc?.id);
+    const midnightDID = parseMidnightDID(midnightDIDString);
 
-      expect(midnightDID.network).toBe(api.midnightNetwork.toString());
-      expect(midnightDID.id).toBe(contractAddress)
+    expect(midnightDID.network).toBe(api.midnightNetwork.toString());
+    expect(midnightDID.id).toBe(contractAddress);
   });
 
   it(`should be updated the verification method with ${VerificationMethodType.RedJubJubVerificationKey2025} public key`, async () => {
     const methodId = parseDIDKeyID(`${didString}#key-1`);
-    const publicKeyHex = "f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2";
+    const publicKeyHex = 'f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2';
     const publicKeyMultibase = parsePublicKeyMultibase(hexToPublicKeyMultibase(publicKeyHex));
 
     const operations: DIDOperation[] = [
@@ -124,20 +129,26 @@ describe('Midnight DID', () => {
           id: methodId,
           type: VerificationMethodType.RedJubJubVerificationKey2025,
           controller: didString,
-          publicKeyMultibase: publicKeyMultibase
-        }
-      },    
+          publicKeyMultibase: publicKeyMultibase,
+          publicKeyJwk: {
+            kty: KeyType.EC,
+            crv: CurveType.ed25519,
+            x: 42n,
+            y: 84n,
+          },
+        },
+      },
     ];
 
     await api.update(contract, operations);
-    
+
     const didDocument = await api.resolve(providers, contract);
-    logger.info(`DIDDocument JSON: ${JSON.stringify(didDocument, null, 2)}`);
+    logger.info(`DIDDocument JSON: ${JSON.stringify(didDocument, BigIntReplacer, 2)}`);
 
-    expect(didDocument?.verificationMethod).not.toBeNull()
+    expect(didDocument?.verificationMethod).not.toBeNull();
 
-    const insertedVerificationMethod = didDocument?.verificationMethod?.find(vm => vm.id === methodId);  
-    
+    const insertedVerificationMethod = didDocument?.verificationMethod?.find((vm) => vm.id === methodId);
+
     expect(insertedVerificationMethod).not.toBeNull;
     expect(insertedVerificationMethod?.type).toEqual(VerificationMethodType.RedJubJubVerificationKey2025);
     expect(insertedVerificationMethod?.controller).toEqual(didString);
@@ -151,21 +162,20 @@ describe('Midnight DID', () => {
       {
         type: DIDOperationType.AddVerificationMethodRelation,
         relation: VerificationMethodRelationType.Authentication,
-        methodId: methodId
+        methodId: methodId,
       },
     ];
 
     const result = await api.update(contract, operations);
 
     const didDoc = await api.resolve(providers, contract);
-    logger.info(`DIDDocument JSON: ${JSON.stringify(didDoc, null, 2)}`);
-    expect(didDoc?.authentication?.some(
-      authenticationMethodId => authenticationMethodId === methodId)).toBe(true);
+    logger.info(`DIDDocument JSON: ${JSON.stringify(didDoc, BigIntReplacer, 2)}`);
+    expect(didDoc?.authentication?.some((authenticationMethodId) => authenticationMethodId === methodId)).toBe(true);
   });
 
   it('should update DID with the new verification method using the batch operation', async () => {
     const methodId = parseDIDKeyID(`${didString}#key-2`);
-    const publicKeyHex = "f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1b4";
+    const publicKeyHex = 'f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1b4';
     const publicKeyMultibase = parsePublicKeyMultibase(hexToPublicKeyMultibase(publicKeyHex));
     const operations: DIDOperation[] = [
       {
@@ -174,8 +184,14 @@ describe('Midnight DID', () => {
           id: methodId,
           type: VerificationMethodType.Ed25519VerificationKey2020,
           controller: didString,
-          publicKeyMultibase: publicKeyMultibase
-        }
+          publicKeyMultibase: publicKeyMultibase,
+          publicKeyJwk: {
+            kty: KeyType.EC,
+            crv: CurveType.ed25519,
+            x: 42n,
+            y: 84n,
+          },
+        },
       },
       // {
       //   type: DIDOperationType.AddVerificationMethodRelation,
@@ -188,18 +204,18 @@ describe('Midnight DID', () => {
     expect(result.txId).toMatch(/[0-9a-f]{64}/);
 
     const didDoc = await api.resolve(providers, contract);
-    logger.info(`DIDDocument JSON: ${JSON.stringify(didDoc, null, 2)}`);
+    logger.info(`DIDDocument JSON: ${JSON.stringify(didDoc, BigIntReplacer, 2)}`);
 
-    expect(didDoc?.verificationMethod).not.toBeNull()
+    expect(didDoc?.verificationMethod).not.toBeNull();
 
-    const insertedVerificationMethod = didDoc?.verificationMethod?.find(vm => vm.id === methodId);  
+    const insertedVerificationMethod = didDoc?.verificationMethod?.find((vm) => vm.id === methodId);
     expect(insertedVerificationMethod).not.toBeNull;
     expect(insertedVerificationMethod?.type).toEqual(VerificationMethodType.Ed25519VerificationKey2020);
   });
 
-it('should update DID with the new verification method using the batch operation (2)', async () => {
+  it('should update DID with the new verification method using the batch operation (2)', async () => {
     const methodId = parseDIDKeyID(`${didString}#key-2`);
-    const publicKeyHex = "f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1b4";
+    const publicKeyHex = 'f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1b4';
     const publicKeyMultibase = parsePublicKeyMultibase(hexToPublicKeyMultibase(publicKeyHex));
     const operations: DIDOperation[] = [
       // {
@@ -214,7 +230,7 @@ it('should update DID with the new verification method using the batch operation
       {
         type: DIDOperationType.AddVerificationMethodRelation,
         relation: VerificationMethodRelationType.AssertionMethod,
-        methodId: methodId
+        methodId: methodId,
       },
     ];
 
@@ -222,12 +238,15 @@ it('should update DID with the new verification method using the batch operation
     expect(result.txId).toMatch(/[0-9a-f]{64}/);
 
     const didDoc = await api.resolve(providers, contract);
-    logger.info(`DIDDocument JSON: ${JSON.stringify(didDoc, null, 2)}`);
+    logger.info(`DIDDocument JSON: ${JSON.stringify(didDoc, BigIntReplacer, 2)}`);
 
-    expect(didDoc?.verificationMethod).not.toBeNull()
+    expect(didDoc?.verificationMethod).not.toBeNull();
 
-    const insertedVerificationMethod = didDoc?.verificationMethod?.find(vm => vm.id === methodId);  
+    const insertedVerificationMethod = didDoc?.verificationMethod?.find((vm) => vm.id === methodId);
     expect(insertedVerificationMethod).not.toBeNull;
     expect(insertedVerificationMethod?.type).toEqual(VerificationMethodType.Ed25519VerificationKey2020);
+
+    //use this code to freeze the docker environment setup
+    // await new Promise(resolve => setTimeout(resolve, 50 * 60 * 1000));
   });
 });

@@ -14,6 +14,7 @@
 // limitations under the License.
 
 import path from 'node:path';
+
 import { NetworkId, setNetworkId } from '@midnight-ntwrk/midnight-js-network-id';
 export const currentDir = path.resolve(new URL(import.meta.url).pathname, '..');
 

@@ -13,7 +13,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { type Config, StandaloneConfig, currentDir, TestnetRemoteConfig } from '../config';
+import { nativeToken } from '@midnight-ntwrk/ledger';
+import type { Resource } from '@midnight-ntwrk/wallet';
+import type { Wallet } from '@midnight-ntwrk/wallet-api';
+import path from 'path';
+import type { Logger } from 'pino';
+import * as Rx from 'rxjs';
 import {
   DockerComposeEnvironment,
   GenericContainer,
@@ -21,14 +26,10 @@ import {
   type StartedTestContainer,
   Wait,
 } from 'testcontainers';
-import path from 'path';
-import * as api from '../api';
-import * as Rx from 'rxjs';
-import { nativeToken } from '@midnight-ntwrk/ledger';
-import type { Logger } from 'pino';
-import type { Wallet } from '@midnight-ntwrk/wallet-api';
-import type { Resource } from '@midnight-ntwrk/wallet';
 import { expect } from 'vitest';
+
+import * as api from '../api';
+import { type Config, currentDir, StandaloneConfig, TestnetRemoteConfig } from '../config';
 
 const GENESIS_MINT_WALLET_SEED = '0000000000000000000000000000000000000000000000000000000000000001';
 
@@ -126,11 +127,11 @@ export class TestEnvironment {
       const composeFile = process.env.COMPOSE_FILE ?? 'standalone.yml';
       this.logger.info(`Using compose file: ${composeFile}`);
       this.dockerEnv = new DockerComposeEnvironment(path.resolve(currentDir, '..'), composeFile)
-        .withWaitStrategy('counter-proof-server',
+        .withWaitStrategy(
+          'counter-proof-server',
           Wait.forLogMessage('Actix runtime found; starting in Actix runtime', 1),
         )
-        .withWaitStrategy('counter-indexer', 
-          Wait.forLogMessage(/starting indexing/, 1));
+        .withWaitStrategy('counter-indexer', Wait.forLogMessage(/starting indexing/, 1));
       this.env = await this.dockerEnv.up();
 
       this.testConfig.dappConfig = {

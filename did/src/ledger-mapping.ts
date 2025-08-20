@@ -38,12 +38,13 @@ import {
 export class LedgerToDIDDocument {
   static readonly KeyTypeMap: Record<LedgerKeyType, KeyType> = {
     [LedgerKeyType.EC]: KeyType.EC,
-    [LedgerKeyType.Ed]: KeyType.Ed
+    [LedgerKeyType.RSA]: KeyType.RSA,
+    [LedgerKeyType.oct]: KeyType.oct,
   };
 
   static readonly CurveTypeMap: Record<LedgerCurveType, CurveType> = {
     [LedgerCurveType.ed25519]: CurveType.ed25519,
-    [LedgerCurveType.jubjub]: CurveType.jubjub
+    [LedgerCurveType.Jubjub]: CurveType.Jubjub
   };
 
   static readonly VerificationMethodTypeMap: Record<
@@ -189,12 +190,13 @@ export class LedgerToDIDDocument {
 export class DIDDocumentToLedger {
   static readonly KeyTypeMap: Record<KeyType, LedgerKeyType> = {
     [KeyType.EC]: LedgerKeyType.EC,
-    [KeyType.Ed]: LedgerKeyType.Ed
+    [KeyType.RSA]: LedgerKeyType.RSA,
+    [KeyType.oct]: LedgerKeyType.oct,
   };
 
   static readonly CurveTypeMap: Record<CurveType, LedgerCurveType> = {
     [CurveType.ed25519]: LedgerCurveType.ed25519,
-    [CurveType.jubjub]: LedgerCurveType.jubjub
+    [CurveType.Jubjub]: LedgerCurveType.Jubjub
   };
 
   static readonly VerificationMethodTypeMap: Record<

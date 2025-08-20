@@ -51,11 +51,11 @@ export enum VerificationMethodRelation {
 }
 
 export enum KeyType {
-  EC, Ed
+  EC, RSA, oct
 }
 
 export enum CurveType {
-  ed25519, jubjub
+  ed25519, Jubjub
 }
 
 export struct PublicKeyJwk {

@@ -66,13 +66,14 @@ export const VerificationMethodTypeSchema = z.enum(VerificationMethodType);
 
 export enum KeyType {
   EC = "EC",
-  Ed = "Ed"
+  RSA = "RSA",
+  oct = "oct"
 }
 export const KeyTypeSchema = z.enum(KeyType);
 
 export enum CurveType {
   ed25519 = "ed25519",
-  jubjub = "jubjub"
+  Jubjub = "Jubjub"
 }
 export const CurveTypeSchema = z.enum(CurveType);
 

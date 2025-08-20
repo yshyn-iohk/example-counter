@@ -13,24 +13,36 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { type Resource } from '@midnight-ntwrk/wallet';
-import { type Wallet } from '@midnight-ntwrk/wallet-api';
 import { stdin as input, stdout as output } from 'node:process';
 import { createInterface, type Interface } from 'node:readline/promises';
-import { type Logger } from 'pino';
-import { type StartedDockerComposeEnvironment, type DockerComposeEnvironment } from 'testcontainers';
-import { type MidnightDIDProviders, type DeployedMidnightDIDContract } from './common-types';
-import { type Config, StandaloneConfig } from './config';
-import * as api from './api';
-import { createVerificationMethod, DIDOperation, hexToPublicKeyMultibase, parseContractAddress, parseDIDURL, VerificationMethodRelation, VerificationMethodType } from '@midnight-ntwrk/did-contract';
-import { 
-  MidnightDID, 
-  MidnightDIDString,
-  createMidnightDIDString, 
-  VerificationMethod, 
-  DIDOperationType, 
-  parseVerificationMethodRelation 
+
+import {
+  createVerificationMethod,
+  CurveType,
+  DIDOperation,
+  hexToPublicKeyMultibase,
+  KeyType,
+  parseContractAddress,
+  parseDIDURL,
+  VerificationMethodRelation,
+  VerificationMethodType,
 } from '@midnight-ntwrk/did-contract';
+import {
+  createMidnightDIDString,
+  DIDOperationType,
+  MidnightDID,
+  MidnightDIDString,
+  parseVerificationMethodRelation,
+  VerificationMethod,
+} from '@midnight-ntwrk/did-contract';
+import { type Resource } from '@midnight-ntwrk/wallet';
+import { type Wallet } from '@midnight-ntwrk/wallet-api';
+import { type Logger } from 'pino';
+import { type DockerComposeEnvironment, type StartedDockerComposeEnvironment } from 'testcontainers';
+
+import * as api from './api';
+import { type DeployedMidnightDIDContract, type MidnightDIDProviders } from './common-types';
+import { type Config, StandaloneConfig } from './config';
 
 let logger: Logger;
 
@@ -60,10 +72,8 @@ const mainLoop = async (providers: MidnightDIDProviders, rli: Interface): Promis
       case '2': {
         const contract = await findContractByAddress(providers, rli);
         const didDocument = await api.resolve(providers, contract);
-        if (didDocument != null)
-          logger.info('DID resolved successfully.');
-        else
-          logger.error('Failed to resolve the DID...');
+        if (didDocument != null) logger.info('DID resolved successfully.');
+        else logger.error('Failed to resolve the DID...');
         break;
       }
       case '3':
@@ -91,10 +101,10 @@ Which would you like to do? `;
 const updateDIDLoop = async (
   providers: MidnightDIDProviders,
   rli: Interface,
-  contract: DeployedMidnightDIDContract
+  contract: DeployedMidnightDIDContract,
 ): Promise<void> => {
   let pendingOperations: DIDOperation[] = [];
-  const contractAddress = parseContractAddress(contract.deployTxData.public.contractAddress)
+  const contractAddress = parseContractAddress(contract.deployTxData.public.contractAddress);
   const didStr = createMidnightDIDString(contractAddress, api.midnightNetwork);
 
   while (true) {
@@ -104,14 +114,13 @@ const updateDIDLoop = async (
         const verificationMethod = await promptForVerificationMethod(rli, didStr);
         if (verificationMethod == null) {
           logger.error('Invalid verification method input...');
-        }
-        else {
+        } else {
           pendingOperations.push({
             type: DIDOperationType.AddVerificationMethod,
             verificationMethod: verificationMethod,
-           });
+          });
           logger.info('Verification method operation added to pending patches.');
-        };
+        }
         break;
       }
       case '2': {
@@ -119,13 +128,12 @@ const updateDIDLoop = async (
         const methodId = await promptForVerificationMethodId(rli);
 
         if (verificationMethodRelation === null || methodId === null) {
-          logger.error("Invalid input for verification method relation or id...");
-        }
-        else {
+          logger.error('Invalid input for verification method relation or id...');
+        } else {
           pendingOperations.push({
             type: DIDOperationType.AddVerificationMethodRelation,
             methodId: methodId,
-            relation: verificationMethodRelation
+            relation: verificationMethodRelation,
           });
           logger.info('Verification relation operation added to pending patches.');
         }
@@ -167,10 +175,10 @@ Enter Verification Method type:'
 `);
 
   let verificationMethodType: VerificationMethodType = VerificationMethodType.Undefined;
-  switch(verificationMethodTypeInput) {
-    case('1'):
+  switch (verificationMethodTypeInput) {
+    case '1':
       verificationMethodType = VerificationMethodType.Ed25519VerificationKey2020;
-    case('2'):
+    case '2':
       verificationMethodType = VerificationMethodType.RedJubJubVerificationKey2025;
   }
 
@@ -181,7 +189,13 @@ Enter Verification Method type:'
     id: verificationMethodId,
     type: verificationMethodType,
     controller: did,
-    publicKeyMultibase: publicKeyMultibase
+    publicKeyMultibase: publicKeyMultibase,
+    publicKeyJwk: {
+      kty: KeyType.Ed,
+      crv: CurveType.ed25519,
+      x: 0n,
+      y: 0n,
+    },
   });
 }
 
@@ -298,4 +312,3 @@ async function findContractByAddress(providers: MidnightDIDProviders, rli: Inter
   const contract = await api.joinContract(providers, constractAddress);
   return contract;
 }
-

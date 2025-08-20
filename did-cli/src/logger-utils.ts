@@ -13,11 +13,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import * as path from 'node:path';
-import * as fs from 'node:fs/promises';
-import pinoPretty from 'pino-pretty';
-import pino from 'pino';
 import { createWriteStream } from 'node:fs';
+import * as fs from 'node:fs/promises';
+import * as path from 'node:path';
+
+import pino from 'pino';
+import pinoPretty from 'pino-pretty';
+
+export const BigIntReplacer = (_key: string, value: unknown) => (typeof value === 'bigint' ? value.toString() : value);
 
 export const createLogger = async (logPath: string): Promise<pino.Logger> => {
   await fs.mkdir(path.dirname(logPath), { recursive: true });

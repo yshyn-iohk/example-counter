@@ -13,26 +13,37 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-import { CompactTypeVector, type ContractAddress, CompactType, CompactTypeField } from '@midnight-ntwrk/compact-runtime';
+import { match } from 'node:assert';
+import * as fs from 'node:fs';
+import * as fsAsync from 'node:fs/promises';
+import { type Interface } from 'node:readline/promises';
+
 import {
-  MidnightDIDPrivateState,
+  CompactType,
+  CompactTypeField,
+  CompactTypeVector,
+  type ContractAddress,
+} from '@midnight-ntwrk/compact-runtime';
+import {
   DIDContract,
-  witnesses,
   DIDDocument,
   DIDDocumentToLedger,
-  LedgerToDIDDocument,
-  MidnightNetwork,
   DIDOperation,
   DIDOperationType,
+  LedgerToDIDDocument,
+  MidnightDIDPrivateState,
+  MidnightNetwork,
   OperationBuilder,
   parseContractAddress,
+  witnesses,
 } from '@midnight-ntwrk/did-contract';
+import { DIDUpdateOperation, ledger } from '@midnight-ntwrk/did-contract/dist/managed/did/contract/index.cjs';
 import { type CoinInfo, nativeToken, Transaction, type TransactionId } from '@midnight-ntwrk/ledger';
 import { deployContract, findDeployedContract } from '@midnight-ntwrk/midnight-js-contracts';
 import { httpClientProofProvider } from '@midnight-ntwrk/midnight-js-http-client-proof-provider';
 import { indexerPublicDataProvider } from '@midnight-ntwrk/midnight-js-indexer-public-data-provider';
+import { levelPrivateStateProvider } from '@midnight-ntwrk/midnight-js-level-private-state-provider';
+import { getLedgerNetworkId, getNetworkId, getZswapNetworkId, NetworkId } from '@midnight-ntwrk/midnight-js-network-id';
 import { NodeZkConfigProvider } from '@midnight-ntwrk/midnight-js-node-zk-config-provider';
 import {
   type BalancedTransaction,
@@ -42,6 +53,7 @@ import {
   type UnbalancedTransaction,
   type WalletProvider,
 } from '@midnight-ntwrk/midnight-js-types';
+import { assertIsContractAddress, toHex } from '@midnight-ntwrk/midnight-js-utils';
 import { type Resource, WalletBuilder } from '@midnight-ntwrk/wallet';
 import { type Wallet } from '@midnight-ntwrk/wallet-api';
 import { Transaction as ZswapTransaction } from '@midnight-ntwrk/zswap';
@@ -49,23 +61,17 @@ import { webcrypto } from 'crypto';
 import { type Logger } from 'pino';
 import * as Rx from 'rxjs';
 import { WebSocket } from 'ws';
+import { length } from 'zod/v4-mini';
+
 import {
+  type DeployedMidnightDIDContract,
   type MidnightDIDContract,
   type MidnightDIDPrivateStateId,
   type MidnightDIDProviders,
-  type DeployedMidnightDIDContract,
   NetworkMapping,
 } from './common-types';
 import { type Config, contractConfig } from './config';
-import { levelPrivateStateProvider } from '@midnight-ntwrk/midnight-js-level-private-state-provider';
-import { assertIsContractAddress, toHex } from '@midnight-ntwrk/midnight-js-utils';
-import { getLedgerNetworkId, getNetworkId, getZswapNetworkId, NetworkId } from '@midnight-ntwrk/midnight-js-network-id';
-import * as fsAsync from 'node:fs/promises';
-import * as fs from 'node:fs';
-import { match } from 'node:assert';
-import { type Interface } from 'node:readline/promises';
-import { length } from 'zod/v4-mini';
-import { DIDUpdateOperation, ledger } from '@midnight-ntwrk/did-contract/dist/managed/did/contract/index.cjs';
+import { BigIntReplacer } from './logger-utils';
 
 let logger: Logger;
 // Instead of setting globalThis.crypto which is read-only, we'll ensure crypto is available
@@ -81,25 +87,14 @@ export const getMidnightDIDLedgerState = async (
   logger.info('Checking MidnightDID contract ledger state...');
   const state = await providers.publicDataProvider
     .queryContractState(contractAddress)
-    .then((contractState) => (contractState != null
-      ? DIDContract.ledger(contractState.data)
-      : null)
-    );
-    if (state != null || state != undefined)
-      logger.info(LedgerToDIDDocument.toJSON(state));
-  // logger.info(
-  //   JSON.stringify(
-  //     state ? state : null,
-  //     (key, value) => (typeof value === 'bigint' ? value.toString() : value),
-  //     2
-  //   )
-  // );
+    .then((contractState) => (contractState != null ? DIDContract.ledger(contractState.data) : null));
+  if (state != null || state != undefined) logger.info(LedgerToDIDDocument.toJSON(state));
 
   if (state != null && state?.verificationMethods != null) {
     for (const [id, method] of state!.verificationMethods) {
       logger.info(`VerificaitonMethod: id: ${id}, type: ${method.type}`);
-    };
-  };
+    }
+  }
 
   return state;
 };
@@ -134,7 +129,6 @@ export const deploy = async (
   return didContract;
 };
 
-
 // Create DID operation is the same as deploy the contract operation
 // Later it can be optimized to create the DID with the keys and services
 export const createDID = async (
@@ -158,17 +152,16 @@ export const update = async (
   logger.info(`Updating DID at contract address: ${didContract.deployTxData.public.contractAddress}`);
 
   let ledgerOperations = DIDDocumentToLedger.updateOperations(patches);
-  logger.info("Ledger operations:");
-  ledgerOperations.map(lo => logger.info(JSON.stringify(lo)));
+  logger.info('Ledger operations:');
+  ledgerOperations.map((lo) => logger.info(JSON.stringify(lo, BigIntReplacer, 2)));
 
   let ledgerOperationsWithPadding = OperationBuilder.padding(ledgerOperations);
 
   const verifiedOperations = OperationBuilder.verifyOperations(ledgerOperationsWithPadding);
 
-  logger.info("DIDUpdateOperations:")
-  verifiedOperations.map(op => { 
-    if (op.operationType != DIDContract.OperationType.Undefined) 
-      logger.info(JSON.stringify(op));
+  logger.info('DIDUpdateOperations:');
+  verifiedOperations.map((op) => {
+    if (op.operationType != DIDContract.OperationType.Undefined) logger.info(JSON.stringify(op, BigIntReplacer, 2));
   });
 
   const finalizedTxData = await didContract.callTx.applyOperations(verifiedOperations);
@@ -185,8 +178,8 @@ export class DomainToRuntime {
     [MidnightNetwork.DevNet]: NetworkId.DevNet,
     [MidnightNetwork.Testnet]: NetworkId.TestNet,
     [MidnightNetwork.Mainnet]: NetworkId.MainNet,
-  }
-};
+  };
+}
 
 export class RuntimeToDomain {
   static readonly NetworkMap: Record<NetworkId, MidnightNetwork> = {
@@ -195,7 +188,7 @@ export class RuntimeToDomain {
     [NetworkId.TestNet]: MidnightNetwork.Testnet,
     [NetworkId.MainNet]: MidnightNetwork.Mainnet,
   };
-};
+}
 
 export const midnightNetwork: MidnightNetwork = RuntimeToDomain.NetworkMap[getNetworkId()];
 
@@ -213,13 +206,16 @@ export const resolve = async (
     logger.info(`There is no Midnight DID contract deployed at ${contractAddress}.`);
     return null;
   } else {
-    let didDocument = LedgerToDIDDocument
-      .ledgerStateToDIDDocument(didContractState, midnightNetwork, midnightContractAddress);
-    
-      logger.info(`MidnightDID Document:
-      ${JSON.stringify(didDocument)}`);
-    
-      return didDocument;
+    let didDocument = LedgerToDIDDocument.ledgerStateToDIDDocument(
+      didContractState,
+      midnightNetwork,
+      midnightContractAddress,
+    );
+
+    logger.info(`MidnightDID Document:
+      ${JSON.stringify(didDocument, BigIntReplacer, 2)}`);
+
+    return didDocument;
   }
 };
 

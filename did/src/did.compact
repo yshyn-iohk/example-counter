@@ -19,6 +19,9 @@ import CompactStandardLibrary;
 
 export ledger id: ContractAddress;
 export ledger version: Counter;
+export ledger createdAt: Uint<64>;
+export ledger updatedAt: Uint<64>;
+export ledger deactivatedAt: Uint<64>;
 export ledger active: Boolean;
 export ledger operationCount: Counter;
 export ledger verificationMethods: Map<Opaque<"string">, VerificationMethod>;
@@ -47,25 +50,25 @@ export enum VerificationMethodRelation {
 }
 
 export enum KeyType {
-  EC, 
-  OKP
+  EC, Ed
 }
 
 export enum CurveType {
-  Ed25519, 
-  JubJub
+  ed25519, jubjub
 }
 
-export PublicKey {
+export struct PublicKeyJwk {
   kty: KeyType,
   crv: CurveType,
-  crvPoint: CurvePoint, //(x: bigint, y: bigint)
+  x: Field,
+  y: Field,
 }
 
 export struct VerificationMethod {
   id: Opaque<"string">,
   type: VerificationMethodType,
-  publicKey: PublicKey,
+  publicKey: Bytes<32>,
+  publicKeyJwk: PublicKeyJwk
 };
 
 export struct Service {
@@ -141,6 +144,7 @@ constructor() {
   //TODO: clarify with the Midnight team why `id` is not set correctly (did.api.test.ts)
   id = kernel.self();
   active = true;
+  //createdAt = witnesses.getEpoc();
 }
 
 //TODO: clarify with Midnight team how to find/deploy the smart contract with args

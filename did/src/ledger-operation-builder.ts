@@ -1,10 +1,10 @@
-import { log } from "console";
 import {
   AddServiceOptions,
   AddVerificationMethodOptions,
   AddVerificationMethodRelationOptions,
   DIDUpdateOperation,
   OperationType,
+  PublicKeyJwk,
   RemoveServiceOptions,
   RemoveVerificationMethodOptions,
   RemoveVerificationMethodRelationOptions,
@@ -12,14 +12,24 @@ import {
   UpdateVerificationMethodOptions,
   VerificationMethod,
   VerificationMethodRelation,
-  VerificationMethodType
+  VerificationMethodType,
+  KeyType,
+  CurveType
 } from "./managed/did/contract/index.cjs";
 
 export class OperationBuilder {
+  static defaultPublicKeyJwk: PublicKeyJwk = {
+    kty: KeyType.EC,
+    crv: CurveType.ed25519,
+    x: 0n,
+    y: 0n,
+  }
+
   static defaultVerificationMethod: VerificationMethod = {
     id: "",
     type: VerificationMethodType.Undefined,
-    publicKey: new Uint8Array(32).fill(0)
+    publicKey: new Uint8Array(32).fill(0),
+    publicKeyJwk: this.defaultPublicKeyJwk,
   };
 
   static defaultDIDUpdateOperation: DIDUpdateOperation = {

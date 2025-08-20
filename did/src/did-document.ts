@@ -67,13 +67,36 @@ export enum VerificationMethodType {
 }
 export const VerificationMethodTypeSchema = z.enum(VerificationMethodType);
 
+export enum KeyType {
+  EC = "EC",
+  Ed = "Ed"
+}
+export const KeyTypeSchema = z.enum(KeyType);
+
+export enum CurveType {
+  ed25519 = "ed25519",
+  jubjub = "jubjub"
+}
+export const CurveTypeSchema = z.enum(CurveType);
+
+export const PublicKeyJwkSchema = z.object({
+  kty: KeyTypeSchema,
+  crv: CurveTypeSchema,
+  x: z.bigint(),
+  y: z.bigint(),
+});
+
+export type PublicKeyJwk = z.infer<typeof PublicKeyJwkSchema>;
+
 /** Verification Method */
 export const VerificationMethodSchema = z.object({
   id: DIDKeyIDSchema,
   type: VerificationMethodTypeSchema,
   controller: DIDStringSchema,
-  publicKeyMultibase: PublicKeyMultibaseSchema
+  publicKeyMultibase: PublicKeyMultibaseSchema,
+  publicKeyJwk: PublicKeyJwkSchema
 });
+
 export type VerificationMethod = z.infer<typeof VerificationMethodSchema>;
 
 /** Verification Method Relation */
@@ -183,6 +206,7 @@ export function createVerificationMethod(params: {
   type: VerificationMethodType;
   controller: string;
   publicKeyMultibase: string;
+  publicKeyJwk: PublicKeyJwk;
 }): VerificationMethod {
   return VerificationMethodSchema.parse(params);
 }

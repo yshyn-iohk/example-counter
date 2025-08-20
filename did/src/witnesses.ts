@@ -19,4 +19,8 @@ export type MidnightDIDPrivateState = {
   //TODO: add private keys to protect the state from modification
 };
 
-export const witnesses = {};
+export const witnesses = {
+  getEpoch() {
+    return Date.now();
+  }
+};

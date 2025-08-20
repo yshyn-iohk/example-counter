@@ -6,6 +6,8 @@ import {
   createDIDDocument,
   createService,
   createVerificationMethod,
+  CurveType,
+  KeyType,
   KnownDIDMediaTypesSchema,
   parseDID,
   parseDIDResolutionResult,
@@ -37,7 +39,13 @@ describe("DID Schemas", () => {
       id: "did:example:123#key-1",
       type: VerificationMethodType.Ed25519VerificationKey2020,
       controller: "did:example:123",
-      publicKeyMultibase: "z6Mks2R1"
+      publicKeyMultibase: "z6Mks2R1",
+      publicKeyJwk: {
+        kty: KeyType.EC,
+        crv: CurveType.ed25519,
+        x: 0n,
+        y: 0n,
+      }
     });
     expect(vm.id).toBe("did:example:123#key-1");
   });
@@ -60,7 +68,13 @@ describe("DID Schemas", () => {
           id: "did:example:123#key-1",
           type: VerificationMethodType.Ed25519VerificationKey2020,
           controller: "did:example:123",
-          publicKeyMultibase: "z6Mks2R1"
+          publicKeyMultibase: "z6Mks2R1",
+          publicKeyJwk: {
+            kty: KeyType.EC,
+            crv: CurveType.ed25519,
+            x: 0n,
+            y: 0n,
+          }          
         })
       ]
     });
@@ -122,7 +136,13 @@ describe("DID Schemas", () => {
       id: "did:example:123#key-1",
       type: VerificationMethodType.Ed25519VerificationKey2020,
       controller: "did:example:123",
-      publicKeyMultibase: "z6Mks2R1"
+      publicKeyMultibase: "z6Mks2R1",
+      publicKeyJwk: {
+        kty: KeyType.EC,
+        crv: CurveType.ed25519,
+        x: 0n,
+        y: 0n,
+      }
     });
     expect(vm.id).toBe("did:example:123#key-1");
   });
@@ -147,7 +167,13 @@ describe("DID Schemas", () => {
           id: "did:example:123#key-1",
           type: VerificationMethodType.Ed25519VerificationKey2020,
           controller: "did:example:123",
-          publicKeyMultibase: "z6Mks2R1"
+          publicKeyMultibase: "z6Mks2R1",
+          publicKeyJwk: {
+            kty: KeyType.EC,
+            crv: CurveType.ed25519,
+            x: 0n,
+            y: 0n
+          },
         })
       ]
     });

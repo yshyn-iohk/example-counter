@@ -5,6 +5,9 @@ import {
     createDIDDocument,
     createVerificationMethod,
     DIDDocument,
+    PublicKeyJwk,
+    CurveType,
+    KeyType,
     publicKeyMultibaseToBytes,
     VerificationMethod,
     VerificationMethodRelationType,
@@ -17,7 +20,10 @@ import {
     OperationType as LedgerOperationType,
     VerificationMethod as LedgerVerificationMethod,
     VerificationMethodRelation as LedgerVerificationMethodRelation,
-    VerificationMethodType as LedgerVerificationMethodType
+    VerificationMethodType as LedgerVerificationMethodType,
+    PublicKeyJwk as LedgerPublicKeyJwk,
+    CurveType as LedgerCurveType,
+    KeyType as LedgerKeyType
 } from "./managed/did/contract/index.cjs";
 import {
     createMidnightDIDString,
@@ -26,9 +32,21 @@ import {
     ContractAddress as MidnightContractAddress
 } from "./midnight-did";
 import { ContractAddress } from "@midnight-ntwrk/compact-runtime";
+import { OperationBuilder } from "./ledger-operation-builder";
 
 //TODO: rename DIDDocument to Domain
 export class LedgerToDIDDocument {
+
+    static readonly KeyTypeMap: Record<LedgerKeyType, KeyType> = {
+        [LedgerKeyType.EC]: KeyType.EC,
+        [LedgerKeyType.Ed]: KeyType.Ed,
+    }
+
+    static readonly CurveTypeMap: Record<LedgerCurveType, CurveType> = {
+        [LedgerCurveType.ed25519]: CurveType.ed25519,
+        [LedgerCurveType.jubjub]: CurveType.jubjub,
+    }
+
     static readonly VerificationMethodTypeMap: Record<
         LedgerVerificationMethodType,
         VerificationMethodType
@@ -58,6 +76,15 @@ export class LedgerToDIDDocument {
                 VerificationMethodRelationType.CapabilityDelegation
         };
 
+    static publicKeyJwk(publicKeyJwk: LedgerPublicKeyJwk): PublicKeyJwk {
+        return {
+            kty: this.KeyTypeMap[publicKeyJwk.kty],
+            crv: this.CurveTypeMap[publicKeyJwk.crv],
+            x: publicKeyJwk.x,
+            y: publicKeyJwk.y
+        };
+    };
+
     static toJSON(ledger: Ledger): object {
         return {
             id: Buffer.from(ledger.id.bytes).toString("hex"),
@@ -67,7 +94,8 @@ export class LedgerToDIDDocument {
             verificationMethods: Array.from(ledger.verificationMethods, ([id, method]) => ({
                 id,
                 type: method.type,
-                publicKey: Buffer.from(method.publicKey).toString("hex")
+                publicKey: Buffer.from(method.publicKey).toString("hex"),
+                publicKeyJwk: this.publicKeyJwk(method.publicKeyJwk)
             })),
             authenticationRelation: Array.from(ledger.authenticationRelation),
             assertionMethodRelation: Array.from(ledger.assertionMethodRelation),
@@ -108,7 +136,8 @@ export class LedgerToDIDDocument {
                     id,
                     type: LedgerToDIDDocument.VerificationMethodTypeMap[method.type],
                     controller: did,
-                    publicKeyMultibase: bytesToPublicKeyMultibase(method.publicKey)
+                    publicKeyMultibase: bytesToPublicKeyMultibase(method.publicKey),
+                    publicKeyJwk: this.publicKeyJwk(method.publicKeyJwk),
                 })
             );
         }
@@ -153,6 +182,17 @@ export class LedgerToDIDDocument {
 
 // TODO: rename DIDDocument to Domain
 export class DIDDocumentToLedger {
+
+    static readonly KeyTypeMap: Record<KeyType, LedgerKeyType> = {
+        [KeyType.EC]: LedgerKeyType.EC,
+        [KeyType.Ed]: LedgerKeyType.Ed,
+    };
+
+    static readonly CurveTypeMap: Record<CurveType, LedgerCurveType> = {
+        [CurveType.ed25519]: LedgerCurveType.ed25519,
+        [CurveType.jubjub]: LedgerCurveType.jubjub,
+    };
+
     static readonly VerificationMethodTypeMap: Record<
         VerificationMethodType,
         LedgerVerificationMethodType
@@ -182,15 +222,27 @@ export class DIDDocumentToLedger {
                 LedgerVerificationMethodRelation.CapabilityDelegation
         };
 
+    static publicKeyJwk(
+        publicKeyJwk: PublicKeyJwk
+    ): LedgerPublicKeyJwk {
+        return {
+            kty: this.KeyTypeMap[publicKeyJwk.kty],
+            crv: this.CurveTypeMap[publicKeyJwk.crv],
+            x: publicKeyJwk.x,
+            y: publicKeyJwk.y,
+        };
+    };
+
     static verificationMethod(
         method: VerificationMethod
     ): LedgerVerificationMethod {
         return {
             id: method.id,
             type: this.VerificationMethodTypeMap[method.type],
-            publicKey: publicKeyMultibaseToBytes(method.publicKeyMultibase)
+            publicKey: publicKeyMultibaseToBytes(method.publicKeyMultibase),
+            publicKeyJwk: this.publicKeyJwk(method.publicKeyJwk),
         };
-    }
+    };
 
     static readonly OperationMap: Record<DIDOperationType, LedgerOperationType> =
         {
@@ -210,7 +262,8 @@ export class DIDDocumentToLedger {
     static undefinedVerificationMethod: LedgerVerificationMethod = {
         id: "",
         type: LedgerVerificationMethodType.Undefined,
-        publicKey: new Uint8Array(32)
+        publicKey: new Uint8Array(32),
+        publicKeyJwk: OperationBuilder.defaultPublicKeyJwk
     };
 
     //TODO: clarify with Midnight team how to init the default struct

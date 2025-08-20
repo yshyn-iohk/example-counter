@@ -2,6 +2,8 @@ import { beforeEach, describe, expect, it } from "vitest";
 
 import { OperationBuilder } from "../ledger-operation-builder";
 import {
+  CurveType,
+  KeyType,
   VerificationMethodRelation,
   VerificationMethodType
 } from "../managed/did/contract/index.cjs";
@@ -10,7 +12,13 @@ import { MidnightDIDSimulator } from "./midnight-did-simulator";
 const mockMethod = {
   id: "did:midnight:xyz#key-1",
   type: VerificationMethodType.Ed25519VerificationKey2020,
-  publicKey: new Uint8Array(32).fill(1)
+  publicKey: new Uint8Array(32).fill(1),
+  publicKeyJwk: {
+    kty: KeyType.EC,
+    crv: CurveType.ed25519,
+    x: 0n,
+    y: 0n,
+  }
 };
 
 //const emptyOperations = new Array(32).fill(OperationBuilder.undefined());

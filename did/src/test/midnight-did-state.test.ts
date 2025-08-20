@@ -17,7 +17,7 @@ const mockMethod = {
     kty: KeyType.EC,
     crv: CurveType.ed25519,
     x: 0n,
-    y: 0n,
+    y: 0n
   }
 };
 

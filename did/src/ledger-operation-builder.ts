@@ -2,7 +2,9 @@ import {
   AddServiceOptions,
   AddVerificationMethodOptions,
   AddVerificationMethodRelationOptions,
+  CurveType,
   DIDUpdateOperation,
+  KeyType,
   OperationType,
   PublicKeyJwk,
   RemoveServiceOptions,
@@ -12,9 +14,7 @@ import {
   UpdateVerificationMethodOptions,
   VerificationMethod,
   VerificationMethodRelation,
-  VerificationMethodType,
-  KeyType,
-  CurveType
+  VerificationMethodType
 } from "./managed/did/contract/index.cjs";
 
 export class OperationBuilder {
@@ -22,14 +22,14 @@ export class OperationBuilder {
     kty: KeyType.EC,
     crv: CurveType.ed25519,
     x: 0n,
-    y: 0n,
-  }
+    y: 0n
+  };
 
   static defaultVerificationMethod: VerificationMethod = {
     id: "",
     type: VerificationMethodType.Undefined,
     publicKey: new Uint8Array(32).fill(0),
-    publicKeyJwk: this.defaultPublicKeyJwk,
+    publicKeyJwk: this.defaultPublicKeyJwk
   };
 
   static defaultDIDUpdateOperation: DIDUpdateOperation = {
@@ -166,10 +166,14 @@ export class OperationBuilder {
     return padded;
   }
 
-  static verifyOperations(operations: DIDUpdateOperation[]): DIDUpdateOperation[] {
+  static verifyOperations(
+    operations: DIDUpdateOperation[]
+  ): DIDUpdateOperation[] {
     // Basic shape check: must be an array of exactly 8 operations
     if (!Array.isArray(operations) || operations.length !== 8) {
-      throw new Error("Invalid operations: must be an array of exactly 8 items");
+      throw new Error(
+        "Invalid operations: must be an array of exactly 8 items"
+      );
     }
 
     const isUint8Array32 = (u: any): boolean =>
@@ -194,56 +198,104 @@ export class OperationBuilder {
 
       // addVerificationMethodOptions.verificationMethod
       const avm = (t as any).addVerificationMethodOptions;
-      if (typeof avm !== "object" || avm === null || typeof avm.verificationMethod !== "object" || avm.verificationMethod === null) {
+      if (
+        typeof avm !== "object" ||
+        avm === null ||
+        typeof avm.verificationMethod !== "object" ||
+        avm.verificationMethod === null
+      ) {
         throw new Error(`Invalid addVerificationMethodOptions at index ${idx}`);
       }
       if (!inNumRange(avm.verificationMethod.type, 0, 2)) {
-        throw new Error(`Invalid verificationMethod.type (add) at index ${idx}: expected 0..2`);
+        throw new Error(
+          `Invalid verificationMethod.type (add) at index ${idx}: expected 0..2`
+        );
       }
       if (!isUint8Array32(avm.verificationMethod.publicKey)) {
-        throw new Error(`Invalid verificationMethod.publicKey (add) at index ${idx}: expected Uint8Array(32)`);
+        throw new Error(
+          `Invalid verificationMethod.publicKey (add) at index ${idx}: expected Uint8Array(32)`
+        );
       }
 
       // updateVerificationMethodOptions.verificationMethod
       const uvm = (t as any).updateVerificationMethodOptions;
-      if (typeof uvm !== "object" || uvm === null || typeof uvm.verificationMethod !== "object" || uvm.verificationMethod === null) {
-        throw new Error(`Invalid updateVerificationMethodOptions at index ${idx}`);
+      if (
+        typeof uvm !== "object" ||
+        uvm === null ||
+        typeof uvm.verificationMethod !== "object" ||
+        uvm.verificationMethod === null
+      ) {
+        throw new Error(
+          `Invalid updateVerificationMethodOptions at index ${idx}`
+        );
       }
       if (!inNumRange(uvm.verificationMethod.type, 0, 2)) {
-        throw new Error(`Invalid verificationMethod.type (update) at index ${idx}: expected 0..2`);
+        throw new Error(
+          `Invalid verificationMethod.type (update) at index ${idx}: expected 0..2`
+        );
       }
       if (!isUint8Array32(uvm.verificationMethod.publicKey)) {
-        throw new Error(`Invalid verificationMethod.publicKey (update) at index ${idx}: expected Uint8Array(32)`);
+        throw new Error(
+          `Invalid verificationMethod.publicKey (update) at index ${idx}: expected Uint8Array(32)`
+        );
       }
 
       // removeVerificationMethodOptions (object presence only as per hint)
       const rvm = (t as any).removeVerificationMethodOptions;
       if (typeof rvm !== "object" || rvm === null) {
-        throw new Error(`Invalid removeVerificationMethodOptions at index ${idx}`);
+        throw new Error(
+          `Invalid removeVerificationMethodOptions at index ${idx}`
+        );
       }
 
       // addVerificationMethodRelationOptions.relation: 0..5
       const avmr = (t as any).addVerificationMethodRelationOptions;
-      if (typeof avmr !== "object" || avmr === null || !inNumRange(avmr.relation, 0, 5)) {
-        throw new Error(`Invalid addVerificationMethodRelationOptions.relation at index ${idx}: expected 0..5`);
+      if (
+        typeof avmr !== "object" ||
+        avmr === null ||
+        !inNumRange(avmr.relation, 0, 5)
+      ) {
+        throw new Error(
+          `Invalid addVerificationMethodRelationOptions.relation at index ${idx}: expected 0..5`
+        );
       }
 
       // removeVerificationMethodRelationOptions.relation: 0..5
       const rvml = (t as any).removeVerificationMethodRelationOptions;
-      if (typeof rvml !== "object" || rvml === null || !inNumRange(rvml.relation, 0, 5)) {
-        throw new Error(`Invalid removeVerificationMethodRelationOptions.relation at index ${idx}: expected 0..5`);
+      if (
+        typeof rvml !== "object" ||
+        rvml === null ||
+        !inNumRange(rvml.relation, 0, 5)
+      ) {
+        throw new Error(
+          `Invalid removeVerificationMethodRelationOptions.relation at index ${idx}: expected 0..5`
+        );
       }
 
       // addServiceOptions.serviceEndpoint: array length === 4
       const aso = (t as any).addServiceOptions;
-      if (typeof aso !== "object" || aso === null || !Array.isArray(aso.serviceEndpoint) || aso.serviceEndpoint.length !== 4) {
-        throw new Error(`Invalid addServiceOptions.serviceEndpoint at index ${idx}: expected array length 4`);
+      if (
+        typeof aso !== "object" ||
+        aso === null ||
+        !Array.isArray(aso.serviceEndpoint) ||
+        aso.serviceEndpoint.length !== 4
+      ) {
+        throw new Error(
+          `Invalid addServiceOptions.serviceEndpoint at index ${idx}: expected array length 4`
+        );
       }
 
       // updateServiceOptions.serviceEndpoint: array length === 4
       const uso = (t as any).updateServiceOptions;
-      if (typeof uso !== "object" || uso === null || !Array.isArray(uso.serviceEndpoint) || uso.serviceEndpoint.length !== 4) {
-        throw new Error(`Invalid updateServiceOptions.serviceEndpoint at index ${idx}: expected array length 4`);
+      if (
+        typeof uso !== "object" ||
+        uso === null ||
+        !Array.isArray(uso.serviceEndpoint) ||
+        uso.serviceEndpoint.length !== 4
+      ) {
+        throw new Error(
+          `Invalid updateServiceOptions.serviceEndpoint at index ${idx}: expected array length 4`
+        );
       }
 
       // removeServiceOptions (object presence only as per hint)

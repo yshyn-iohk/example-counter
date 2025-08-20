@@ -44,7 +44,7 @@ describe("DID Schemas", () => {
         kty: KeyType.EC,
         crv: CurveType.ed25519,
         x: 0n,
-        y: 0n,
+        y: 0n
       }
     });
     expect(vm.id).toBe("did:example:123#key-1");
@@ -73,8 +73,8 @@ describe("DID Schemas", () => {
             kty: KeyType.EC,
             crv: CurveType.ed25519,
             x: 0n,
-            y: 0n,
-          }          
+            y: 0n
+          }
         })
       ]
     });
@@ -141,7 +141,7 @@ describe("DID Schemas", () => {
         kty: KeyType.EC,
         crv: CurveType.ed25519,
         x: 0n,
-        y: 0n,
+        y: 0n
       }
     });
     expect(vm.id).toBe("did:example:123#key-1");
@@ -173,7 +173,7 @@ describe("DID Schemas", () => {
             crv: CurveType.ed25519,
             x: 0n,
             y: 0n
-          },
+          }
         })
       ]
     });

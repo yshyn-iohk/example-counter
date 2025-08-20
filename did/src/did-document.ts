@@ -23,14 +23,12 @@ export const KeyIDSchema = z
 export type KeyID = z.infer<typeof KeyIDSchema>;
 
 /** DID Key ID (e.g. did:example:123#key-1) */
-export const DIDKeyIDSchema = DIDURLSchema
-  .check(
-    z.refine((val) => {
-      const [_, fragment] = val.split("#");
-      return KeyIDSchema.safeParse(fragment).success;
-    }, "Invalid DID Key ID format: invalid or missing fragment")
-  )
-  .brand("DIDKeyID");
+export const DIDKeyIDSchema = DIDURLSchema.check(
+  z.refine((val) => {
+    const [_, fragment] = val.split("#");
+    return KeyIDSchema.safeParse(fragment).success;
+  }, "Invalid DID Key ID format: invalid or missing fragment")
+).brand("DIDKeyID");
 
 export type DIDKeyID = z.infer<typeof DIDKeyIDSchema>;
 
@@ -40,10 +38,9 @@ export const DIDStringSchema = z
   .check(
     z.startsWith("did:"),
     z.minLength(5),
-    z.refine(
-      (val) => val.split(":").length >= 3 && !/[/?#]/.test(val),
-      { error: "Invalid DID format" }
-    )
+    z.refine((val) => val.split(":").length >= 3 && !/[/?#]/.test(val), {
+      error: "Invalid DID format"
+    })
   )
   .brand("DID");
 export type DIDString = z.infer<typeof DIDStringSchema>;
@@ -83,7 +80,7 @@ export const PublicKeyJwkSchema = z.object({
   kty: KeyTypeSchema,
   crv: CurveTypeSchema,
   x: z.bigint(),
-  y: z.bigint(),
+  y: z.bigint()
 });
 
 export type PublicKeyJwk = z.infer<typeof PublicKeyJwkSchema>;

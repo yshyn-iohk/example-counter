@@ -1,355 +1,357 @@
+import { ContractAddress } from "@midnight-ntwrk/compact-runtime";
 import { Buffer } from "buffer";
 
 import {
-    bytesToPublicKeyMultibase,
-    createDIDDocument,
-    createVerificationMethod,
-    DIDDocument,
-    PublicKeyJwk,
-    CurveType,
-    KeyType,
-    publicKeyMultibaseToBytes,
-    VerificationMethod,
-    VerificationMethodRelationType,
-    VerificationMethodType
+  bytesToPublicKeyMultibase,
+  createDIDDocument,
+  createVerificationMethod,
+  CurveType,
+  DIDDocument,
+  KeyType,
+  PublicKeyJwk,
+  publicKeyMultibaseToBytes,
+  VerificationMethod,
+  VerificationMethodRelationType,
+  VerificationMethodType
 } from "./did-document";
 import { DIDOperation, DIDOperationType } from "./did-operations";
+import { OperationBuilder } from "./ledger-operation-builder";
 import {
-    DIDUpdateOperation as LedgerUpdateOperation,
-    Ledger,
-    OperationType as LedgerOperationType,
-    VerificationMethod as LedgerVerificationMethod,
-    VerificationMethodRelation as LedgerVerificationMethodRelation,
-    VerificationMethodType as LedgerVerificationMethodType,
-    PublicKeyJwk as LedgerPublicKeyJwk,
-    CurveType as LedgerCurveType,
-    KeyType as LedgerKeyType
+  CurveType as LedgerCurveType,
+  DIDUpdateOperation as LedgerUpdateOperation,
+  KeyType as LedgerKeyType,
+  Ledger,
+  OperationType as LedgerOperationType,
+  PublicKeyJwk as LedgerPublicKeyJwk,
+  VerificationMethod as LedgerVerificationMethod,
+  VerificationMethodRelation as LedgerVerificationMethodRelation,
+  VerificationMethodType as LedgerVerificationMethodType
 } from "./managed/did/contract/index.cjs";
 import {
-    createMidnightDIDString,
-    MidnightNetwork,
-    parseContractAddress,
-    ContractAddress as MidnightContractAddress
+  ContractAddress as MidnightContractAddress,
+  createMidnightDIDString,
+  MidnightNetwork,
+  parseContractAddress
 } from "./midnight-did";
-import { ContractAddress } from "@midnight-ntwrk/compact-runtime";
-import { OperationBuilder } from "./ledger-operation-builder";
 
 //TODO: rename DIDDocument to Domain
 export class LedgerToDIDDocument {
+  static readonly KeyTypeMap: Record<LedgerKeyType, KeyType> = {
+    [LedgerKeyType.EC]: KeyType.EC,
+    [LedgerKeyType.Ed]: KeyType.Ed
+  };
 
-    static readonly KeyTypeMap: Record<LedgerKeyType, KeyType> = {
-        [LedgerKeyType.EC]: KeyType.EC,
-        [LedgerKeyType.Ed]: KeyType.Ed,
-    }
+  static readonly CurveTypeMap: Record<LedgerCurveType, CurveType> = {
+    [LedgerCurveType.ed25519]: CurveType.ed25519,
+    [LedgerCurveType.jubjub]: CurveType.jubjub
+  };
 
-    static readonly CurveTypeMap: Record<LedgerCurveType, CurveType> = {
-        [LedgerCurveType.ed25519]: CurveType.ed25519,
-        [LedgerCurveType.jubjub]: CurveType.jubjub,
-    }
+  static readonly VerificationMethodTypeMap: Record<
+    LedgerVerificationMethodType,
+    VerificationMethodType
+  > = {
+    [LedgerVerificationMethodType.Undefined]: VerificationMethodType.Undefined,
+    [LedgerVerificationMethodType.Ed25519VerificationKey2020]:
+      VerificationMethodType.Ed25519VerificationKey2020,
+    [LedgerVerificationMethodType.RedJubJubVerificationKey2025]:
+      VerificationMethodType.RedJubJubVerificationKey2025
+  };
 
-    static readonly VerificationMethodTypeMap: Record<
-        LedgerVerificationMethodType,
-        VerificationMethodType
-    > = {
-            [LedgerVerificationMethodType.Undefined]: VerificationMethodType.Undefined,
-            [LedgerVerificationMethodType.Ed25519VerificationKey2020]:
-                VerificationMethodType.Ed25519VerificationKey2020,
-            [LedgerVerificationMethodType.RedJubJubVerificationKey2025]:
-                VerificationMethodType.RedJubJubVerificationKey2025
-        };
+  static readonly VerificationMethodRelationMap: Record<
+    LedgerVerificationMethodRelation,
+    VerificationMethodRelationType
+  > = {
+    [LedgerVerificationMethodRelation.Undefined]:
+      VerificationMethodRelationType.Undefined,
+    [LedgerVerificationMethodRelation.Authentication]:
+      VerificationMethodRelationType.Authentication,
+    [LedgerVerificationMethodRelation.AssertionMethod]:
+      VerificationMethodRelationType.AssertionMethod,
+    [LedgerVerificationMethodRelation.KeyAgreement]:
+      VerificationMethodRelationType.KeyAgreement,
+    [LedgerVerificationMethodRelation.CapabilityInvocation]:
+      VerificationMethodRelationType.CapabilityInvocation,
+    [LedgerVerificationMethodRelation.CapabilityDelegation]:
+      VerificationMethodRelationType.CapabilityDelegation
+  };
 
-    static readonly VerificationMethodRelationMap: Record<
-        LedgerVerificationMethodRelation,
-        VerificationMethodRelationType
-    > = {
-            [LedgerVerificationMethodRelation.Undefined]:
-                VerificationMethodRelationType.Undefined,
-            [LedgerVerificationMethodRelation.Authentication]:
-                VerificationMethodRelationType.Authentication,
-            [LedgerVerificationMethodRelation.AssertionMethod]:
-                VerificationMethodRelationType.AssertionMethod,
-            [LedgerVerificationMethodRelation.KeyAgreement]:
-                VerificationMethodRelationType.KeyAgreement,
-            [LedgerVerificationMethodRelation.CapabilityInvocation]:
-                VerificationMethodRelationType.CapabilityInvocation,
-            [LedgerVerificationMethodRelation.CapabilityDelegation]:
-                VerificationMethodRelationType.CapabilityDelegation
-        };
-
-    static publicKeyJwk(publicKeyJwk: LedgerPublicKeyJwk): PublicKeyJwk {
-        return {
-            kty: this.KeyTypeMap[publicKeyJwk.kty],
-            crv: this.CurveTypeMap[publicKeyJwk.crv],
-            x: publicKeyJwk.x,
-            y: publicKeyJwk.y
-        };
+  static publicKeyJwk(publicKeyJwk: LedgerPublicKeyJwk): PublicKeyJwk {
+    return {
+      kty: this.KeyTypeMap[publicKeyJwk.kty],
+      crv: this.CurveTypeMap[publicKeyJwk.crv],
+      x: publicKeyJwk.x,
+      y: publicKeyJwk.y
     };
+  }
 
-    static toJSON(ledger: Ledger): object {
-        return {
-            id: Buffer.from(ledger.id.bytes).toString("hex"),
-            version: Number(ledger.version.toString()),
-            active: ledger.active,
-            operationCount: Number(ledger.operationCount.toString()),
-            verificationMethods: Array.from(ledger.verificationMethods, ([id, method]) => ({
-                id,
-                type: method.type,
-                publicKey: Buffer.from(method.publicKey).toString("hex"),
-                publicKeyJwk: this.publicKeyJwk(method.publicKeyJwk)
-            })),
-            authenticationRelation: Array.from(ledger.authenticationRelation),
-            assertionMethodRelation: Array.from(ledger.assertionMethodRelation),
-            keyAgreementRelation: Array.from(ledger.keyAgreementRelation),
-            capabilityInvocationRelation: Array.from(ledger.capabilityInvocationRelation),
-            capabilityDelegationRelation: Array.from(ledger.capabilityDelegationRelation),
-            services: Array.from(ledger.services, ([id, service]) => ({
-                id,
-                type: service.type,
-                serviceEndpoint: service.serviceEndpoint
-            }))
-        };
+  static toJSON(ledger: Ledger): object {
+    return {
+      id: Buffer.from(ledger.id.bytes).toString("hex"),
+      version: Number(ledger.version.toString()),
+      active: ledger.active,
+      operationCount: Number(ledger.operationCount.toString()),
+      verificationMethods: Array.from(
+        ledger.verificationMethods,
+        ([id, method]) => ({
+          id,
+          type: method.type,
+          publicKey: Buffer.from(method.publicKey).toString("hex"),
+          publicKeyJwk: this.publicKeyJwk(method.publicKeyJwk)
+        })
+      ),
+      authenticationRelation: Array.from(ledger.authenticationRelation),
+      assertionMethodRelation: Array.from(ledger.assertionMethodRelation),
+      keyAgreementRelation: Array.from(ledger.keyAgreementRelation),
+      capabilityInvocationRelation: Array.from(
+        ledger.capabilityInvocationRelation
+      ),
+      capabilityDelegationRelation: Array.from(
+        ledger.capabilityDelegationRelation
+      ),
+      services: Array.from(ledger.services, ([id, service]) => ({
+        id,
+        type: service.type,
+        serviceEndpoint: service.serviceEndpoint
+      }))
+    };
+  }
+
+  /**
+   * Converts a Ledger to a DIDDocument for the Midnight DID method.
+   * @param did - MidnightDID associated with the ledger
+   * @param ledger - Ledger object from the contract state
+   * @returns DIDDocument
+   */
+  static ledgerStateToDIDDocument(
+    ledger: Ledger,
+    network: MidnightNetwork,
+    contractAddress: MidnightContractAddress
+  ): DIDDocument {
+    //TODO: think about the context for the new key type
+    const MidnightDIDDocumentContext = Array.of("https://www.w3.org/ns/did/v1");
+
+    //const contractAddress = parseContractAddress(Buffer.from(ledger.id.bytes).toString("hex"));
+
+    const did = createMidnightDIDString(contractAddress, network);
+
+    const verificationMethod = [];
+    for (const [id, method] of ledger.verificationMethods) {
+      verificationMethod.push(
+        createVerificationMethod({
+          id,
+          type: LedgerToDIDDocument.VerificationMethodTypeMap[method.type],
+          controller: did,
+          publicKeyMultibase: bytesToPublicKeyMultibase(method.publicKey),
+          publicKeyJwk: this.publicKeyJwk(method.publicKeyJwk)
+        })
+      );
     }
 
-    /**
-     * Converts a Ledger to a DIDDocument for the Midnight DID method.
-     * @param did - MidnightDID associated with the ledger
-     * @param ledger - Ledger object from the contract state
-     * @returns DIDDocument
-     */
-    static ledgerStateToDIDDocument(
-        ledger: Ledger,
-        network: MidnightNetwork,
-        contractAddress: MidnightContractAddress
-    ): DIDDocument {
+    const assertionMethod = ledger.assertionMethodRelation.isEmpty()
+      ? undefined
+      : Array.from(ledger.assertionMethodRelation);
 
-        //TODO: think about the context for the new key type
-        const MidnightDIDDocumentContext = Array.of("https://www.w3.org/ns/did/v1");
+    const authentication = ledger.authenticationRelation.isEmpty()
+      ? undefined
+      : Array.from(ledger.authenticationRelation);
 
-        //const contractAddress = parseContractAddress(Buffer.from(ledger.id.bytes).toString("hex"));
+    const capabilityDelegation = ledger.capabilityDelegationRelation.isEmpty()
+      ? undefined
+      : Array.from(ledger.capabilityDelegationRelation);
 
-        const did = createMidnightDIDString(contractAddress, network);
+    const capabilityInvocation = ledger.capabilityInvocationRelation.isEmpty()
+      ? undefined
+      : Array.from(ledger.capabilityInvocationRelation);
 
-        const verificationMethod = [];
-        for (const [id, method] of ledger.verificationMethods) {
-            verificationMethod.push(
-                createVerificationMethod({
-                    id,
-                    type: LedgerToDIDDocument.VerificationMethodTypeMap[method.type],
-                    controller: did,
-                    publicKeyMultibase: bytesToPublicKeyMultibase(method.publicKey),
-                    publicKeyJwk: this.publicKeyJwk(method.publicKeyJwk),
-                })
-            );
-        }
+    const keyAgreement = ledger.keyAgreementRelation.isEmpty()
+      ? undefined
+      : Array.from(ledger.keyAgreementRelation);
 
-        const assertionMethod = ledger.assertionMethodRelation.isEmpty()
-            ? undefined
-            : Array.from(ledger.assertionMethodRelation);
+    const didDocument = createDIDDocument({
+      id: did,
+      context: MidnightDIDDocumentContext,
+      alsoKnownAs: undefined,
+      controller: did,
+      verificationMethod: verificationMethod,
+      authentication: authentication,
+      assertionMethod: assertionMethod,
+      keyAgreement: keyAgreement,
+      capabilityInvocation: capabilityInvocation,
+      capabilityDelegation: capabilityDelegation,
+      service: undefined //TODO
+    });
 
-        const authentication = ledger.authenticationRelation.isEmpty()
-            ? undefined
-            : Array.from(ledger.authenticationRelation);
-
-        const capabilityDelegation = ledger.capabilityDelegationRelation.isEmpty()
-            ? undefined
-            : Array.from(ledger.capabilityDelegationRelation);
-
-        const capabilityInvocation = ledger.capabilityInvocationRelation.isEmpty()
-            ? undefined
-            : Array.from(ledger.capabilityInvocationRelation);
-
-        const keyAgreement = ledger.keyAgreementRelation.isEmpty()
-            ? undefined
-            : Array.from(ledger.keyAgreementRelation);
-
-        const didDocument = createDIDDocument({
-            id: did,
-            context: MidnightDIDDocumentContext,
-            alsoKnownAs: undefined,
-            controller: did,
-            verificationMethod: verificationMethod,
-            authentication: authentication,
-            assertionMethod: assertionMethod,
-            keyAgreement: keyAgreement,
-            capabilityInvocation: capabilityInvocation,
-            capabilityDelegation: capabilityDelegation,
-            service: undefined //TODO
-        });
-
-        return didDocument;
-    }
+    return didDocument;
+  }
 }
 
 // TODO: rename DIDDocument to Domain
 export class DIDDocumentToLedger {
+  static readonly KeyTypeMap: Record<KeyType, LedgerKeyType> = {
+    [KeyType.EC]: LedgerKeyType.EC,
+    [KeyType.Ed]: LedgerKeyType.Ed
+  };
 
-    static readonly KeyTypeMap: Record<KeyType, LedgerKeyType> = {
-        [KeyType.EC]: LedgerKeyType.EC,
-        [KeyType.Ed]: LedgerKeyType.Ed,
+  static readonly CurveTypeMap: Record<CurveType, LedgerCurveType> = {
+    [CurveType.ed25519]: LedgerCurveType.ed25519,
+    [CurveType.jubjub]: LedgerCurveType.jubjub
+  };
+
+  static readonly VerificationMethodTypeMap: Record<
+    VerificationMethodType,
+    LedgerVerificationMethodType
+  > = {
+    [VerificationMethodType.Undefined]: LedgerVerificationMethodType.Undefined,
+    [VerificationMethodType.Ed25519VerificationKey2020]:
+      LedgerVerificationMethodType.Ed25519VerificationKey2020,
+    [VerificationMethodType.RedJubJubVerificationKey2025]:
+      LedgerVerificationMethodType.RedJubJubVerificationKey2025
+  };
+
+  static readonly VerificationMethodRelationMap: Record<
+    VerificationMethodRelationType,
+    LedgerVerificationMethodRelation
+  > = {
+    [VerificationMethodRelationType.Undefined]:
+      LedgerVerificationMethodRelation.Undefined,
+    [VerificationMethodRelationType.Authentication]:
+      LedgerVerificationMethodRelation.Authentication,
+    [VerificationMethodRelationType.AssertionMethod]:
+      LedgerVerificationMethodRelation.AssertionMethod,
+    [VerificationMethodRelationType.KeyAgreement]:
+      LedgerVerificationMethodRelation.KeyAgreement,
+    [VerificationMethodRelationType.CapabilityInvocation]:
+      LedgerVerificationMethodRelation.CapabilityInvocation,
+    [VerificationMethodRelationType.CapabilityDelegation]:
+      LedgerVerificationMethodRelation.CapabilityDelegation
+  };
+
+  static publicKeyJwk(publicKeyJwk: PublicKeyJwk): LedgerPublicKeyJwk {
+    return {
+      kty: this.KeyTypeMap[publicKeyJwk.kty],
+      crv: this.CurveTypeMap[publicKeyJwk.crv],
+      x: publicKeyJwk.x,
+      y: publicKeyJwk.y
+    };
+  }
+
+  static verificationMethod(
+    method: VerificationMethod
+  ): LedgerVerificationMethod {
+    return {
+      id: method.id,
+      type: this.VerificationMethodTypeMap[method.type],
+      publicKey: publicKeyMultibaseToBytes(method.publicKeyMultibase),
+      publicKeyJwk: this.publicKeyJwk(method.publicKeyJwk)
+    };
+  }
+
+  static readonly OperationMap: Record<DIDOperationType, LedgerOperationType> =
+    {
+      [DIDOperationType.AddVerificationMethod]:
+        LedgerOperationType.AddVerificationMethod,
+      [DIDOperationType.UpdateVerificationMethod]:
+        LedgerOperationType.UpdateVerificationMethod,
+      [DIDOperationType.RemoveVerificationMethod]:
+        LedgerOperationType.RemoveVerificationMethod,
+      [DIDOperationType.AddVerificationMethodRelation]:
+        LedgerOperationType.AddVerificationMethodRelation,
+      [DIDOperationType.RemoveVerificationMethodRelation]:
+        LedgerOperationType.RemoveVerificationMethodRelation,
+      [DIDOperationType.Deactivate]: LedgerOperationType.Deactivate
     };
 
-    static readonly CurveTypeMap: Record<CurveType, LedgerCurveType> = {
-        [CurveType.ed25519]: LedgerCurveType.ed25519,
-        [CurveType.jubjub]: LedgerCurveType.jubjub,
-    };
+  static undefinedVerificationMethod: LedgerVerificationMethod = {
+    id: "",
+    type: LedgerVerificationMethodType.Undefined,
+    publicKey: new Uint8Array(32),
+    publicKeyJwk: OperationBuilder.defaultPublicKeyJwk
+  };
 
-    static readonly VerificationMethodTypeMap: Record<
-        VerificationMethodType,
-        LedgerVerificationMethodType
-    > = {
-            [VerificationMethodType.Undefined]: LedgerVerificationMethodType.Undefined,
-            [VerificationMethodType.Ed25519VerificationKey2020]:
-                LedgerVerificationMethodType.Ed25519VerificationKey2020,
-            [VerificationMethodType.RedJubJubVerificationKey2025]:
-                LedgerVerificationMethodType.RedJubJubVerificationKey2025
-        };
-
-    static readonly VerificationMethodRelationMap: Record<
-        VerificationMethodRelationType,
-        LedgerVerificationMethodRelation
-    > = {
-            [VerificationMethodRelationType.Undefined]:
-                LedgerVerificationMethodRelation.Undefined,
-            [VerificationMethodRelationType.Authentication]:
-                LedgerVerificationMethodRelation.Authentication,
-            [VerificationMethodRelationType.AssertionMethod]:
-                LedgerVerificationMethodRelation.AssertionMethod,
-            [VerificationMethodRelationType.KeyAgreement]:
-                LedgerVerificationMethodRelation.KeyAgreement,
-            [VerificationMethodRelationType.CapabilityInvocation]:
-                LedgerVerificationMethodRelation.CapabilityInvocation,
-            [VerificationMethodRelationType.CapabilityDelegation]:
-                LedgerVerificationMethodRelation.CapabilityDelegation
-        };
-
-    static publicKeyJwk(
-        publicKeyJwk: PublicKeyJwk
-    ): LedgerPublicKeyJwk {
-        return {
-            kty: this.KeyTypeMap[publicKeyJwk.kty],
-            crv: this.CurveTypeMap[publicKeyJwk.crv],
-            x: publicKeyJwk.x,
-            y: publicKeyJwk.y,
-        };
-    };
-
-    static verificationMethod(
-        method: VerificationMethod
-    ): LedgerVerificationMethod {
-        return {
-            id: method.id,
-            type: this.VerificationMethodTypeMap[method.type],
-            publicKey: publicKeyMultibaseToBytes(method.publicKeyMultibase),
-            publicKeyJwk: this.publicKeyJwk(method.publicKeyJwk),
-        };
-    };
-
-    static readonly OperationMap: Record<DIDOperationType, LedgerOperationType> =
-        {
-            [DIDOperationType.AddVerificationMethod]:
-                LedgerOperationType.AddVerificationMethod,
-            [DIDOperationType.UpdateVerificationMethod]:
-                LedgerOperationType.UpdateVerificationMethod,
-            [DIDOperationType.RemoveVerificationMethod]:
-                LedgerOperationType.RemoveVerificationMethod,
-            [DIDOperationType.AddVerificationMethodRelation]:
-                LedgerOperationType.AddVerificationMethodRelation,
-            [DIDOperationType.RemoveVerificationMethodRelation]:
-                LedgerOperationType.RemoveVerificationMethodRelation,
-            [DIDOperationType.Deactivate]: LedgerOperationType.Deactivate
-        };
-
-    static undefinedVerificationMethod: LedgerVerificationMethod = {
+  //TODO: clarify with Midnight team how to init the default struct
+  static defaultLedgerUpdateOperation(): LedgerUpdateOperation {
+    return {
+      operationType: LedgerOperationType.Undefined,
+      addVerificationMethodOptions: {
+        verificationMethod: this.undefinedVerificationMethod
+      },
+      updateVerificationMethodOptions: {
+        verificationMethod: this.undefinedVerificationMethod
+      },
+      removeVerificationMethodOptions: {
+        id: ""
+      },
+      addVerificationMethodRelationOptions: {
+        relation: LedgerVerificationMethodRelation.Undefined,
+        methodId: ""
+      },
+      removeVerificationMethodRelationOptions: {
+        relation: LedgerVerificationMethodRelation.Undefined,
+        methodId: ""
+      },
+      addServiceOptions: {
         id: "",
-        type: LedgerVerificationMethodType.Undefined,
-        publicKey: new Uint8Array(32),
-        publicKeyJwk: OperationBuilder.defaultPublicKeyJwk
+        type: "",
+        serviceEndpoint: Array.of("", "", "", "")
+      },
+      updateServiceOptions: {
+        id: "",
+        type: "",
+        serviceEndpoint: Array.of("", "", "", "")
+      },
+      removeServiceOptions: {
+        id: ""
+      }
     };
+  }
 
-    //TODO: clarify with Midnight team how to init the default struct
-    static defaultLedgerUpdateOperation(): LedgerUpdateOperation {
-        return {
-            operationType: LedgerOperationType.Undefined,
-            addVerificationMethodOptions: {
-                verificationMethod: this.undefinedVerificationMethod
-            },
-            updateVerificationMethodOptions: {
-                verificationMethod: this.undefinedVerificationMethod
-            },
-            removeVerificationMethodOptions: {
-                id: ""
-            },
-            addVerificationMethodRelationOptions: {
-                relation: LedgerVerificationMethodRelation.Undefined,
-                methodId: ""
-            },
-            removeVerificationMethodRelationOptions: {
-                relation: LedgerVerificationMethodRelation.Undefined,
-                methodId: ""
-            },
-            addServiceOptions: {
-                id: "",
-                type: "",
-                serviceEndpoint: Array.of("", "", "", "")
-            },
-            updateServiceOptions: {
-                id: "",
-                type: "",
-                serviceEndpoint: Array.of("", "", "", "")
-            },
-            removeServiceOptions: {
-                id: ""
-            }
-        }
-    };
+  static updateOperation(updateOperation: DIDOperation): LedgerUpdateOperation {
+    const { type } = updateOperation;
+    let ledgerUpdateOperation = this.defaultLedgerUpdateOperation();
+    ledgerUpdateOperation.operationType = this.OperationMap[type];
 
-    static updateOperation(updateOperation: DIDOperation): LedgerUpdateOperation {
-        const { type } = updateOperation;
-        let ledgerUpdateOperation = this.defaultLedgerUpdateOperation();
-        ledgerUpdateOperation.operationType = this.OperationMap[type];
-
-        switch (type) {
-            case DIDOperationType.AddVerificationMethod:
-                ledgerUpdateOperation.addVerificationMethodOptions = {
-                    verificationMethod: this.verificationMethod(
-                        updateOperation.verificationMethod
-                    )
-                };
-                return ledgerUpdateOperation;
-            case DIDOperationType.UpdateVerificationMethod:
-                ledgerUpdateOperation.updateVerificationMethodOptions = {
-                    verificationMethod: this.verificationMethod(
-                        updateOperation.verificationMethod
-                    )
-                };
-                return ledgerUpdateOperation;
-            case DIDOperationType.RemoveVerificationMethod:
-                ledgerUpdateOperation.removeVerificationMethodOptions = {
-                    id: updateOperation.id
-                };
-                return ledgerUpdateOperation;
-            case DIDOperationType.AddVerificationMethodRelation:
-                ledgerUpdateOperation.addVerificationMethodRelationOptions = {
-                    methodId: updateOperation.methodId,
-                    relation: this.VerificationMethodRelationMap[updateOperation.relation]
-                };
-                return ledgerUpdateOperation;
-            case DIDOperationType.RemoveVerificationMethodRelation:
-                ledgerUpdateOperation.removeVerificationMethodRelationOptions = {
-                    methodId: updateOperation.methodId,
-                    relation: this.VerificationMethodRelationMap[updateOperation.relation]
-                };
-                return ledgerUpdateOperation;
-            case DIDOperationType.Deactivate:
-                return ledgerUpdateOperation;
-            default:
-                throw new Error(`Unsupported operation type: ${type}`);
-        }
+    switch (type) {
+      case DIDOperationType.AddVerificationMethod:
+        ledgerUpdateOperation.addVerificationMethodOptions = {
+          verificationMethod: this.verificationMethod(
+            updateOperation.verificationMethod
+          )
+        };
+        return ledgerUpdateOperation;
+      case DIDOperationType.UpdateVerificationMethod:
+        ledgerUpdateOperation.updateVerificationMethodOptions = {
+          verificationMethod: this.verificationMethod(
+            updateOperation.verificationMethod
+          )
+        };
+        return ledgerUpdateOperation;
+      case DIDOperationType.RemoveVerificationMethod:
+        ledgerUpdateOperation.removeVerificationMethodOptions = {
+          id: updateOperation.id
+        };
+        return ledgerUpdateOperation;
+      case DIDOperationType.AddVerificationMethodRelation:
+        ledgerUpdateOperation.addVerificationMethodRelationOptions = {
+          methodId: updateOperation.methodId,
+          relation: this.VerificationMethodRelationMap[updateOperation.relation]
+        };
+        return ledgerUpdateOperation;
+      case DIDOperationType.RemoveVerificationMethodRelation:
+        ledgerUpdateOperation.removeVerificationMethodRelationOptions = {
+          methodId: updateOperation.methodId,
+          relation: this.VerificationMethodRelationMap[updateOperation.relation]
+        };
+        return ledgerUpdateOperation;
+      case DIDOperationType.Deactivate:
+        return ledgerUpdateOperation;
+      default:
+        throw new Error(`Unsupported operation type: ${type}`);
     }
+  }
 
-    static updateOperations(
-        operations: Array<DIDOperation>
-    ): Array<LedgerUpdateOperation> {
-        return operations.map((op) => this.updateOperation(op));
-    }
+  static updateOperations(
+    operations: Array<DIDOperation>
+  ): Array<LedgerUpdateOperation> {
+    return operations.map((op) => this.updateOperation(op));
+  }
 }

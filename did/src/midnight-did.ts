@@ -14,6 +14,7 @@
 // limitations under the License.
 
 import { z } from "zod/v4-mini";
+
 import { DIDStringSchema } from "./did-document";
 
 export enum MidnightNetwork {
@@ -36,7 +37,7 @@ export const ContractAddressSchema = z
   .string()
   .check(
     z.regex(HEX_MIDNIGHT_ADD_REGEX, {
-      error: "Invalid contract address: must be 68 lowercase hex characters",
+      error: "Invalid contract address: must be 68 lowercase hex characters"
     })
   )
   .brand("ContractAddress");
@@ -48,20 +49,25 @@ export type ContractAddress = z.infer<typeof ContractAddressSchema>;
  * Format:
  * - did:midnight:<network>:<id>
  */
-export const MidnightDIDStringSchema = DIDStringSchema
-  .check(
-    z.refine((val) => val.startsWith("did:midnight:") && val.split(":").length == 4, { 
-      error: "Invalid MidnightDID string, expected format 'did:midnight:<network>:<id>", 
+export const MidnightDIDStringSchema = DIDStringSchema.check(
+  z.refine(
+    (val) => val.startsWith("did:midnight:") && val.split(":").length == 4,
+    {
+      error:
+        "Invalid MidnightDID string, expected format 'did:midnight:<network>:<id>",
       abort: true
-    },),
-    z.refine((val) => {
+    }
+  ),
+  z.refine(
+    (val) => {
       const parts = val.split(":");
       const [, , network, id] = parts;
       const contractAddress = ContractAddressSchema.parse(id);
       return NETWORKS.includes(network as MidnightNetwork);
-    }, { error: "Invalid MidnightDID string" })
+    },
+    { error: "Invalid MidnightDID string" }
   )
-  .brand("MidnightDIDString");
+).brand("MidnightDIDString");
 
 export type MidnightDIDString = z.infer<typeof MidnightDIDStringSchema>;
 

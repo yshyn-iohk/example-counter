@@ -1,11 +1,8 @@
-import { ContractAddressSchema } from "../midnight-did";
+import { log } from "console";
 // midnight-did.test.ts
-
 import { describe, expect, it } from "vitest";
 import { ZodError } from "zod/v4-mini";
-
-import { MidnightNetwork, parseMidnightDID } from "../midnight-did";
-import { log } from "console";
+import { ContractAddressSchema, MidnightNetwork, parseMidnightDID } from "../midnight-did";
 
 const VALID_ID =
   "0200c14874a279e61d4bf4eebff76f46fada3afbb0183dff21e741975143dcbdabab";
@@ -17,7 +14,9 @@ describe("parseMidnightDID", () => {
       parseMidnightDID(input);
       throw new Error("Expected error");
     } catch (e) {
-      expect((e as ZodError).issues[0].message).toMatch(/Invalid MidnightDID string/);
+      expect((e as ZodError).issues[0].message).toMatch(
+        /Invalid MidnightDID string/
+      );
     }
   });
 
@@ -54,7 +53,9 @@ describe("parseMidnightDID", () => {
       parseMidnightDID(input);
       throw new Error("Expected error");
     } catch (e) {
-      expect((e as ZodError).issues[0].message).toMatch(/Invalid contract address/);
+      expect((e as ZodError).issues[0].message).toMatch(
+        /Invalid contract address/
+      );
     }
   });
 
@@ -65,7 +66,9 @@ describe("parseMidnightDID", () => {
       throw new Error("Expected error");
     } catch (e) {
       //TODO: make the errors better
-      expect((e as ZodError).issues[1].message).toMatch(/Invalid MidnightDID string/);
+      expect((e as ZodError).issues[1].message).toMatch(
+        /Invalid MidnightDID string/
+      );
     }
   });
 
@@ -75,7 +78,9 @@ describe("parseMidnightDID", () => {
       parseMidnightDID(input);
       throw new Error("Expected error");
     } catch (e) {
-      expect((e as ZodError).issues[0].message).toMatch(/Invalid MidnightDID string/);
+      expect((e as ZodError).issues[0].message).toMatch(
+        /Invalid MidnightDID string/
+      );
     }
   });
 
@@ -85,7 +90,9 @@ describe("parseMidnightDID", () => {
       parseMidnightDID(input);
       throw new Error("Expected error");
     } catch (e) {
-      expect((e as ZodError).issues[0].message).toMatch(/Invalid MidnightDID string/);
+      expect((e as ZodError).issues[0].message).toMatch(
+        /Invalid MidnightDID string/
+      );
     }
   });
 
@@ -95,23 +102,24 @@ describe("parseMidnightDID", () => {
       parseMidnightDID(input);
       throw new Error("Expected error");
     } catch (e) {
-      expect((e as ZodError).issues[0].message).toMatch(/Invalid MidnightDID string/);
+      expect((e as ZodError).issues[0].message).toMatch(
+        /Invalid MidnightDID string/
+      );
     }
   });
-
-  
 });
-
 
 // ContractAddressSchema validation tests
 describe("ContractAddressSchema", () => {
   it("accepts a valid 68-character lowercase hex string", () => {
-    const input = "0200c14874a279e61d4bf4eebff76f46fada3afbb0183dff21e741975143dcbdabab";
+    const input =
+      "0200c14874a279e61d4bf4eebff76f46fada3afbb0183dff21e741975143dcbdabab";
     expect(() => ContractAddressSchema.parse(input)).not.toThrow();
   });
 
   it("parse contract address from the read contract", () => {
-    const input = "02000e1869b98d33a81d4b22ed91c71f36275916911ff0d4972022153c01561f7cea"
+    const input =
+      "02000e1869b98d33a81d4b22ed91c71f36275916911ff0d4972022153c01561f7cea";
     expect(() => ContractAddressSchema.parse(input)).not.toThrow();
   });
 
@@ -121,7 +129,9 @@ describe("ContractAddressSchema", () => {
       ContractAddressSchema.parse(input);
       throw new Error("Expected error");
     } catch (e) {
-      expect((e as ZodError).issues[0].message).toMatch(/Invalid contract address/);
+      expect((e as ZodError).issues[0].message).toMatch(
+        /Invalid contract address/
+      );
     }
   });
 
@@ -131,7 +141,9 @@ describe("ContractAddressSchema", () => {
       ContractAddressSchema.parse(input);
       throw new Error("Expected error");
     } catch (e) {
-      expect((e as ZodError).issues[0].message).toMatch(/Invalid contract address/);
+      expect((e as ZodError).issues[0].message).toMatch(
+        /Invalid contract address/
+      );
     }
   });
 
@@ -141,17 +153,22 @@ describe("ContractAddressSchema", () => {
       ContractAddressSchema.parse(input);
       throw new Error("Expected error");
     } catch (e) {
-      expect((e as ZodError).issues[0].message).toMatch(/Invalid contract address/);
+      expect((e as ZodError).issues[0].message).toMatch(
+        /Invalid contract address/
+      );
     }
   });
 
   it("rejects a string with uppercase hex characters", () => {
-    const input = "0200C14874A279E61D4BF4EEBFF76F46FADA3AFBB0183DFF21E741975143DCBDAB";
+    const input =
+      "0200C14874A279E61D4BF4EEBFF76F46FADA3AFBB0183DFF21E741975143DCBDAB";
     try {
       ContractAddressSchema.parse(input);
       throw new Error("Expected error");
     } catch (e) {
-      expect((e as ZodError).issues[0].message).toMatch(/Invalid contract address/);
+      expect((e as ZodError).issues[0].message).toMatch(
+        /Invalid contract address/
+      );
     }
   });
 });

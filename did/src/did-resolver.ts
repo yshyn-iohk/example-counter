@@ -1,4 +1,4 @@
-import { DIDString, DIDDocument } from "./did-document";
+import { DIDDocument, DIDString } from "./did-document";
 
 /**
  * Domain interface for resolving a MidnightDID to a DIDDocument.

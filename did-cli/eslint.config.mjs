@@ -19,6 +19,7 @@ import parser from '@typescript-eslint/parser';
 import pluginPrettier from 'eslint-plugin-prettier';
 import pluginImport from 'eslint-plugin-import';
 import pluginSimpleImportSort from 'eslint-plugin-simple-import-sort';
+import globals from 'globals';
 
 export default [
   js.configs.recommended,
@@ -32,6 +33,9 @@ export default [
         sourceType: 'module',
         project: ['./tsconfig.json'],
       },
+      globals: {
+        ...globals.node
+      }
     },
     plugins: {
       '@typescript-eslint': plugin,

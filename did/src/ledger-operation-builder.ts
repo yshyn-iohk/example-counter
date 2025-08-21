@@ -210,11 +210,6 @@ export class OperationBuilder {
           `Invalid verificationMethod.type (add) at index ${idx}: expected 0..2`
         );
       }
-      if (!isUint8Array32(avm.verificationMethod.publicKey)) {
-        throw new Error(
-          `Invalid verificationMethod.publicKey (add) at index ${idx}: expected Uint8Array(32)`
-        );
-      }
 
       // updateVerificationMethodOptions.verificationMethod
       const uvm = (t as any).updateVerificationMethodOptions;
@@ -231,11 +226,6 @@ export class OperationBuilder {
       if (!inNumRange(uvm.verificationMethod.type, 0, 2)) {
         throw new Error(
           `Invalid verificationMethod.type (update) at index ${idx}: expected 0..2`
-        );
-      }
-      if (!isUint8Array32(uvm.verificationMethod.publicKey)) {
-        throw new Error(
-          `Invalid verificationMethod.publicKey (update) at index ${idx}: expected Uint8Array(32)`
         );
       }
 

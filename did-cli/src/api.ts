@@ -13,23 +13,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { match } from 'node:assert';
 import * as fs from 'node:fs';
 import * as fsAsync from 'node:fs/promises';
-import { type Interface } from 'node:readline/promises';
 
-import {
-  CompactType,
-  CompactTypeField,
-  CompactTypeVector,
-  type ContractAddress,
-} from '@midnight-ntwrk/compact-runtime';
+import { type ContractAddress } from '@midnight-ntwrk/compact-runtime';
 import {
   DIDContract,
   DIDDocument,
   DIDDocumentToLedger,
   DIDOperation,
-  DIDOperationType,
   LedgerToDIDDocument,
   MidnightDIDPrivateState,
   MidnightNetwork,
@@ -37,7 +29,6 @@ import {
   parseContractAddress,
   witnesses,
 } from '@midnight-ntwrk/did-contract';
-import { DIDUpdateOperation, ledger } from '@midnight-ntwrk/did-contract/dist/managed/did/contract/index.cjs';
 import { type CoinInfo, nativeToken, Transaction, type TransactionId } from '@midnight-ntwrk/ledger';
 import { deployContract, findDeployedContract } from '@midnight-ntwrk/midnight-js-contracts';
 import { httpClientProofProvider } from '@midnight-ntwrk/midnight-js-http-client-proof-provider';
@@ -61,14 +52,12 @@ import { webcrypto } from 'crypto';
 import { type Logger } from 'pino';
 import * as Rx from 'rxjs';
 import { WebSocket } from 'ws';
-import { length } from 'zod/v4-mini';
 
 import {
   type DeployedMidnightDIDContract,
   type MidnightDIDContract,
   type MidnightDIDPrivateStateId,
   type MidnightDIDProviders,
-  NetworkMapping,
 } from './common-types';
 import { type Config, contractConfig } from './config';
 import { BigIntReplacer } from './logger-utils';

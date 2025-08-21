@@ -20,29 +20,25 @@ import {
   DIDOperation,
   DIDOperationType,
   DIDStringSchema,
-  hexToPublicKeyMultibase,
   KeyType,
   MidnightDIDSchema,
   MidnightDIDString,
-  OperationBuilder,
+  //OperationBuilder,
   parseContractAddress,
   parseDIDKeyID,
-  parseDIDURL,
   parseMidnightDID,
   parseMidnightDIDString,
-  parsePublicKeyMultibase,
-  VerificationMethodRelation,
+  //VerificationMethodRelation,
   VerificationMethodRelationType,
   VerificationMethodType,
 } from '@midnight-ntwrk/did-contract';
 import { type Resource } from '@midnight-ntwrk/wallet';
 import { type Wallet } from '@midnight-ntwrk/wallet-api';
-import { log } from 'console';
 import path from 'path';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 import * as api from '../api';
-import { DeployedMidnightDIDContract, MidnightDIDContract, type MidnightDIDProviders } from '../common-types';
+import { DeployedMidnightDIDContract, type MidnightDIDProviders } from '../common-types';
 import { currentDir } from '../config';
 import { BigIntReplacer, createLogger } from '../logger-utils';
 import { TestEnvironment } from './commons';
@@ -117,25 +113,23 @@ describe('Midnight DID', () => {
     expect(midnightDID.id).toBe(contractAddress);
   });
 
-  it(`should be updated the verification method with ${VerificationMethodType.RedJubJubVerificationKey2025} public key`, async () => {
+  it(`should be updated the verification method with ${VerificationMethodType.JubJubVerificationKey2025} public key`, async () => {
     const methodId = parseDIDKeyID(`${didString}#key-1`);
-    const publicKeyHex = 'f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2';
-    const publicKeyMultibase = parsePublicKeyMultibase(hexToPublicKeyMultibase(publicKeyHex));
+    const publicKeyJwk = {
+      kty: KeyType.EC,
+      crv: CurveType.ed25519,
+      x: 42n,
+      y: 84n,
+    };
 
     const operations: DIDOperation[] = [
       {
         type: DIDOperationType.AddVerificationMethod,
         verificationMethod: {
           id: methodId,
-          type: VerificationMethodType.RedJubJubVerificationKey2025,
+          type: VerificationMethodType.JubJubVerificationKey2025,
           controller: didString,
-          publicKeyMultibase: publicKeyMultibase,
-          publicKeyJwk: {
-            kty: KeyType.EC,
-            crv: CurveType.ed25519,
-            x: 42n,
-            y: 84n,
-          },
+          publicKeyJwk: publicKeyJwk,
         },
       },
     ];
@@ -150,9 +144,9 @@ describe('Midnight DID', () => {
     const insertedVerificationMethod = didDocument?.verificationMethod?.find((vm) => vm.id === methodId);
 
     expect(insertedVerificationMethod).not.toBeNull;
-    expect(insertedVerificationMethod?.type).toEqual(VerificationMethodType.RedJubJubVerificationKey2025);
+    expect(insertedVerificationMethod?.type).toEqual(VerificationMethodType.JubJubVerificationKey2025);
     expect(insertedVerificationMethod?.controller).toEqual(didString);
-    expect(insertedVerificationMethod?.publicKeyMultibase).toEqual(publicKeyMultibase);
+    expect(insertedVerificationMethod?.publicKeyJwk).toEqual(publicKeyJwk);
   });
 
   it('should be updated with the verification relation', async () => {
@@ -166,7 +160,7 @@ describe('Midnight DID', () => {
       },
     ];
 
-    const result = await api.update(contract, operations);
+    await api.update(contract, operations);
 
     const didDoc = await api.resolve(providers, contract);
     logger.info(`DIDDocument JSON: ${JSON.stringify(didDoc, BigIntReplacer, 2)}`);
@@ -175,8 +169,6 @@ describe('Midnight DID', () => {
 
   it('should update DID with the new verification method using the batch operation', async () => {
     const methodId = parseDIDKeyID(`${didString}#key-2`);
-    const publicKeyHex = 'f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1b4';
-    const publicKeyMultibase = parsePublicKeyMultibase(hexToPublicKeyMultibase(publicKeyHex));
     const operations: DIDOperation[] = [
       {
         type: DIDOperationType.AddVerificationMethod,
@@ -184,7 +176,6 @@ describe('Midnight DID', () => {
           id: methodId,
           type: VerificationMethodType.Ed25519VerificationKey2020,
           controller: didString,
-          publicKeyMultibase: publicKeyMultibase,
           publicKeyJwk: {
             kty: KeyType.EC,
             crv: CurveType.ed25519,
@@ -215,8 +206,6 @@ describe('Midnight DID', () => {
 
   it('should update DID with the new verification method using the batch operation (2)', async () => {
     const methodId = parseDIDKeyID(`${didString}#key-2`);
-    const publicKeyHex = 'f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1b4';
-    const publicKeyMultibase = parsePublicKeyMultibase(hexToPublicKeyMultibase(publicKeyHex));
     const operations: DIDOperation[] = [
       // {
       //   type: DIDOperationType.AddVerificationMethod,

@@ -17,23 +17,19 @@ import { stdin as input, stdout as output } from 'node:process';
 import { createInterface, type Interface } from 'node:readline/promises';
 
 import {
+  createMidnightDIDString,
   createVerificationMethod,
   CurveType,
   DIDOperation,
-  hexToPublicKeyMultibase,
+  DIDOperationType,
   KeyType,
+  MidnightDIDString,
   parseContractAddress,
   parseDIDURL,
-  VerificationMethodRelation,
-  VerificationMethodType,
-} from '@midnight-ntwrk/did-contract';
-import {
-  createMidnightDIDString,
-  DIDOperationType,
-  MidnightDID,
-  MidnightDIDString,
   parseVerificationMethodRelation,
   VerificationMethod,
+  VerificationMethodRelation,
+  VerificationMethodType,
 } from '@midnight-ntwrk/did-contract';
 import { type Resource } from '@midnight-ntwrk/wallet';
 import { type Wallet } from '@midnight-ntwrk/wallet-api';
@@ -76,10 +72,11 @@ const mainLoop = async (providers: MidnightDIDProviders, rli: Interface): Promis
         else logger.error('Failed to resolve the DID...');
         break;
       }
-      case '3':
+      case '3': {
         const contract = await findContractByAddress(providers, rli);
         await updateDIDLoop(providers, rli, contract);
         break;
+      }
       case '4':
         logger.info('Exiting...');
         return;
@@ -171,27 +168,25 @@ async function promptForVerificationMethod(rli: Interface, did: MidnightDIDStrin
   const verificationMethodTypeInput = await rli.question(`
 Enter Verification Method type:'
  1. ${VerificationMethodType.Ed25519VerificationKey2020}
- 2. ${VerificationMethodType.RedJubJubVerificationKey2025}
+ 2. ${VerificationMethodType.JubJubVerificationKey2025}
 `);
 
   let verificationMethodType: VerificationMethodType = VerificationMethodType.Undefined;
   switch (verificationMethodTypeInput) {
     case '1':
       verificationMethodType = VerificationMethodType.Ed25519VerificationKey2020;
+      break;
     case '2':
-      verificationMethodType = VerificationMethodType.RedJubJubVerificationKey2025;
+      verificationMethodType = VerificationMethodType.JubJubVerificationKey2025;
+      break;
   }
-
-  const publicKeyHex = await rli.question('Enter publicKey (hex, 32 bytes): ');
-  let publicKeyMultibase = hexToPublicKeyMultibase(publicKeyHex.trim());
 
   return createVerificationMethod({
     id: verificationMethodId,
     type: verificationMethodType,
     controller: did,
-    publicKeyMultibase: publicKeyMultibase,
     publicKeyJwk: {
-      kty: KeyType.Ed,
+      kty: KeyType.EC,
       crv: CurveType.ed25519,
       x: 0n,
       y: 0n,

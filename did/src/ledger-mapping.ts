@@ -2,14 +2,12 @@ import { ContractAddress } from "@midnight-ntwrk/compact-runtime";
 import { Buffer } from "buffer";
 
 import {
-  bytesToPublicKeyMultibase,
   createDIDDocument,
   createVerificationMethod,
   CurveType,
   DIDDocument,
   KeyType,
   PublicKeyJwk,
-  publicKeyMultibaseToBytes,
   VerificationMethod,
   VerificationMethodRelationType,
   VerificationMethodType
@@ -39,7 +37,7 @@ export class LedgerToDIDDocument {
   static readonly KeyTypeMap: Record<LedgerKeyType, KeyType> = {
     [LedgerKeyType.EC]: KeyType.EC,
     [LedgerKeyType.RSA]: KeyType.RSA,
-    [LedgerKeyType.oct]: KeyType.oct,
+    [LedgerKeyType.oct]: KeyType.oct
   };
 
   static readonly CurveTypeMap: Record<LedgerCurveType, CurveType> = {
@@ -54,8 +52,8 @@ export class LedgerToDIDDocument {
     [LedgerVerificationMethodType.Undefined]: VerificationMethodType.Undefined,
     [LedgerVerificationMethodType.Ed25519VerificationKey2020]:
       VerificationMethodType.Ed25519VerificationKey2020,
-    [LedgerVerificationMethodType.RedJubJubVerificationKey2025]:
-      VerificationMethodType.RedJubJubVerificationKey2025
+    [LedgerVerificationMethodType.JubJubVerificationKey2025]:
+      VerificationMethodType.JubJubVerificationKey2025
   };
 
   static readonly VerificationMethodRelationMap: Record<
@@ -96,7 +94,6 @@ export class LedgerToDIDDocument {
         ([id, method]) => ({
           id,
           type: method.type,
-          publicKey: Buffer.from(method.publicKey).toString("hex"),
           publicKeyJwk: this.publicKeyJwk(method.publicKeyJwk)
         })
       ),
@@ -142,7 +139,6 @@ export class LedgerToDIDDocument {
           id,
           type: LedgerToDIDDocument.VerificationMethodTypeMap[method.type],
           controller: did,
-          publicKeyMultibase: bytesToPublicKeyMultibase(method.publicKey),
           publicKeyJwk: this.publicKeyJwk(method.publicKeyJwk)
         })
       );
@@ -191,7 +187,7 @@ export class DIDDocumentToLedger {
   static readonly KeyTypeMap: Record<KeyType, LedgerKeyType> = {
     [KeyType.EC]: LedgerKeyType.EC,
     [KeyType.RSA]: LedgerKeyType.RSA,
-    [KeyType.oct]: LedgerKeyType.oct,
+    [KeyType.oct]: LedgerKeyType.oct
   };
 
   static readonly CurveTypeMap: Record<CurveType, LedgerCurveType> = {
@@ -206,8 +202,8 @@ export class DIDDocumentToLedger {
     [VerificationMethodType.Undefined]: LedgerVerificationMethodType.Undefined,
     [VerificationMethodType.Ed25519VerificationKey2020]:
       LedgerVerificationMethodType.Ed25519VerificationKey2020,
-    [VerificationMethodType.RedJubJubVerificationKey2025]:
-      LedgerVerificationMethodType.RedJubJubVerificationKey2025
+    [VerificationMethodType.JubJubVerificationKey2025]:
+      LedgerVerificationMethodType.JubJubVerificationKey2025
   };
 
   static readonly VerificationMethodRelationMap: Record<
@@ -243,7 +239,6 @@ export class DIDDocumentToLedger {
     return {
       id: method.id,
       type: this.VerificationMethodTypeMap[method.type],
-      publicKey: publicKeyMultibaseToBytes(method.publicKeyMultibase),
       publicKeyJwk: this.publicKeyJwk(method.publicKeyJwk)
     };
   }
@@ -266,7 +261,6 @@ export class DIDDocumentToLedger {
   static undefinedVerificationMethod: LedgerVerificationMethod = {
     id: "",
     type: LedgerVerificationMethodType.Undefined,
-    publicKey: new Uint8Array(32),
     publicKeyJwk: OperationBuilder.defaultPublicKeyJwk
   };
 

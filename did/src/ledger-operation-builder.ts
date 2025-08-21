@@ -28,7 +28,6 @@ export class OperationBuilder {
   static defaultVerificationMethod: VerificationMethod = {
     id: "",
     type: VerificationMethodType.Undefined,
-    publicKey: new Uint8Array(32).fill(0),
     publicKeyJwk: this.defaultPublicKeyJwk
   };
 

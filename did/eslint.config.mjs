@@ -21,10 +21,12 @@ import pluginImport from 'eslint-plugin-import';
 import pluginSimpleImportSort from 'eslint-plugin-simple-import-sort';
 
 export default [
+  {
+    ignores: ['./node_modules/**', './dist/**', './build/**', './src/managed/**']
+  },
   js.configs.recommended,
   {
     files: ['**/*.ts', '**/*.tsx'],
-    ignores: ['./node_modules/**', './dist/**', './build/**', './src/managed/**'],
     languageOptions: {
       parser,
       parserOptions: {

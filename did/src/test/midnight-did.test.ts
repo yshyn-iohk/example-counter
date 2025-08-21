@@ -2,7 +2,12 @@ import { log } from "console";
 // midnight-did.test.ts
 import { describe, expect, it } from "vitest";
 import { ZodError } from "zod/v4-mini";
-import { ContractAddressSchema, MidnightNetwork, parseMidnightDID } from "../midnight-did";
+
+import {
+  ContractAddressSchema,
+  MidnightNetwork,
+  parseMidnightDID
+} from "../midnight-did";
 
 const VALID_ID =
   "0200c14874a279e61d4bf4eebff76f46fada3afbb0183dff21e741975143dcbdabab";

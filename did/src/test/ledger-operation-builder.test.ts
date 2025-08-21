@@ -6,12 +6,18 @@ import {
   VerificationMethodRelation,
   VerificationMethodType
 } from "../managed/did/contract/index.cjs";
+import { CurveType, KeyType } from "../did-document";
 
 describe("OperationBuilder", () => {
   const sampleVM = {
     id: "key-1",
     type: VerificationMethodType.Ed25519VerificationKey2020,
-    publicKey: new Uint8Array(32).fill(1)
+    publicKeyJwk: {
+        kty: KeyType.EC,
+        crv: CurveType.ed25519,
+        x: 8n,
+        y: 16n
+    }
   };
 
   it("should build addVerificationMethod operation", () => {

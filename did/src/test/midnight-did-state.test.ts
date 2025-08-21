@@ -12,7 +12,6 @@ import { MidnightDIDSimulator } from "./midnight-did-simulator";
 const mockMethod = {
   id: "did:midnight:xyz#key-1",
   type: VerificationMethodType.Ed25519VerificationKey2020,
-  publicKey: new Uint8Array(32).fill(1),
   publicKeyJwk: {
     kty: KeyType.EC,
     crv: CurveType.ed25519,
@@ -69,9 +68,9 @@ describe("MidnightDIDSimulator", () => {
     const ledger = sim.applyOperation(
       OperationBuilder.updateVerificationMethod({ verificationMethod: updated })
     );
-    expect(ledger.verificationMethods.lookup(mockMethod.id).publicKey).toEqual(
-      updated.publicKey
-    );
+    expect(
+      ledger.verificationMethods.lookup(mockMethod.id).publicKeyJwk
+    ).toEqual(updated.publicKeyJwk);
     expect(ledger.verificationMethods.lookup(mockMethod.id).type).toEqual(
       mockMethod.type
     );

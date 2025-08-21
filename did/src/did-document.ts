@@ -45,22 +45,11 @@ export const DIDStringSchema = z
   .brand("DID");
 export type DIDString = z.infer<typeof DIDStringSchema>;
 
-/** Multibase public key */
-export const PublicKeyMultibaseSchema = z
-  .string()
-  .check(
-    z.minLength(2),
-    z.regex(/^[0-9A-Za-z]/),
-    z.refine(() => true, { error: "Invalid multibase format" })
-  )
-  .brand("PublicKeyMultibase");
-export type PublicKeyMultibase = z.infer<typeof PublicKeyMultibaseSchema>;
-
 /** Verification Method Types */
 export enum VerificationMethodType {
   Undefined = "Undefined",
   Ed25519VerificationKey2020 = "Ed25519VerificationKey2020",
-  RedJubJubVerificationKey2025 = "RedJubJubVerificationKey2025"
+  JubJubVerificationKey2025 = "JubJubVerificationKey2025"
 }
 export const VerificationMethodTypeSchema = z.enum(VerificationMethodType);
 
@@ -91,7 +80,6 @@ export const VerificationMethodSchema = z.object({
   id: DIDKeyIDSchema,
   type: VerificationMethodTypeSchema,
   controller: DIDStringSchema,
-  publicKeyMultibase: PublicKeyMultibaseSchema,
   publicKeyJwk: PublicKeyJwkSchema
 });
 
@@ -188,8 +176,6 @@ export const parseDIDKeyID = (input: unknown) => DIDKeyIDSchema.parse(input);
 export const parseDID = (input: unknown) => DIDStringSchema.parse(input);
 export const parseVerificationMethod = (input: unknown) =>
   VerificationMethodSchema.parse(input);
-export const parsePublicKeyMultibase = (input: unknown) =>
-  PublicKeyMultibaseSchema.parse(input);
 export const parseService = (input: unknown) => ServiceSchema.parse(input);
 export const parseDIDResolutionResult = (input: unknown) =>
   DIDResolutionResultSchema.parse(input);
@@ -203,7 +189,6 @@ export function createVerificationMethod(params: {
   id: string;
   type: VerificationMethodType;
   controller: string;
-  publicKeyMultibase: string;
   publicKeyJwk: PublicKeyJwk;
 }): VerificationMethod {
   return VerificationMethodSchema.parse(params);
@@ -243,48 +228,4 @@ export function createDIDDocument(params: {
     capabilityDelegation: params.capabilityDelegation ?? null,
     service: params.service ?? null
   });
-}
-/**
- * Converts a hex string to a PublicKeyMultibase using base16 by prepending 'f'.
- */
-export function hexToPublicKeyMultibase(hex: string): PublicKeyMultibase {
-  return `f${hex}` as PublicKeyMultibase;
-}
-
-/**
- * Converts a PublicKeyMultibase (base16) to a hex string by stripping the leading 'f'.
- */
-export function publicKeyMultibaseToHex(multibase: PublicKeyMultibase): string {
-  if (!multibase.startsWith("f")) {
-    throw new Error('Unsupported multibase, expected "f" (base16)');
-  }
-  return multibase.slice(1);
-}
-
-/**
- * Converts a PublicKeyMultibase (base16, starting with 'f') to a Uint8Array.
- * @param multibase - PublicKeyMultibase string.
- * @returns Uint8Array of the decoded public key bytes.
- */
-export function publicKeyMultibaseToBytes(
-  multibase: PublicKeyMultibase
-): Uint8Array {
-  if (!multibase.startsWith("f")) {
-    throw new Error('Unsupported multibase, expected "f" (base16)');
-  }
-  return Uint8Array.from(Buffer.from(multibase.slice(1), "hex"));
-}
-
-/**
- * Converts a Uint8Array (or ArrayBufferLike) to a PublicKeyMultibase string using base16 (prepend 'f').
- * @param bytes - Uint8Array or ArrayBufferLike representing the public key.
- * @returns PublicKeyMultibase string.
- */
-export function bytesToPublicKeyMultibase(
-  bytes: Uint8Array | ArrayBufferLike
-): string {
-  const uint8Bytes =
-    bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes);
-  const hex = Buffer.from(uint8Bytes).toString("hex");
-  return `f${hex}`;
 }

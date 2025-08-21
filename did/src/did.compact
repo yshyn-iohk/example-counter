@@ -38,7 +38,7 @@ witness getEpoc(): Uint<64>;
 export enum VerificationMethodType {
   Undefined,
   Ed25519VerificationKey2020,
-  RedJubJubVerificationKey2025
+  JubJubVerificationKey2025
 }
 
 export enum VerificationMethodRelation {
@@ -68,7 +68,6 @@ export struct PublicKeyJwk {
 export struct VerificationMethod {
   id: Opaque<"string">,
   type: VerificationMethodType,
-  publicKey: Bytes<32>,
   publicKeyJwk: PublicKeyJwk
 };
 

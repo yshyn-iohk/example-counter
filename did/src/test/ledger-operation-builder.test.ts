@@ -1,22 +1,22 @@
 import { describe, expect, it } from "vitest";
 
+import { CurveType, KeyType } from "../did-document";
 import { OperationBuilder } from "../ledger-operation-builder";
 import {
   OperationType,
   VerificationMethodRelation,
   VerificationMethodType
 } from "../managed/did/contract/index.cjs";
-import { CurveType, KeyType } from "../did-document";
 
 describe("OperationBuilder", () => {
   const sampleVM = {
     id: "key-1",
     type: VerificationMethodType.Ed25519VerificationKey2020,
     publicKeyJwk: {
-        kty: KeyType.EC,
-        crv: CurveType.ed25519,
-        x: 8n,
-        y: 16n
+      kty: KeyType.EC,
+      crv: CurveType.ed25519,
+      x: 8n,
+      y: 16n
     }
   };
 

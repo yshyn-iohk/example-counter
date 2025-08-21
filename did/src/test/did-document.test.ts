@@ -39,7 +39,6 @@ describe("DID Schemas", () => {
       id: "did:example:123#key-1",
       type: VerificationMethodType.Ed25519VerificationKey2020,
       controller: "did:example:123",
-      publicKeyMultibase: "z6Mks2R1",
       publicKeyJwk: {
         kty: KeyType.EC,
         crv: CurveType.ed25519,
@@ -135,7 +134,6 @@ describe("DID Schemas", () => {
       id: "did:example:123#key-1",
       type: VerificationMethodType.Ed25519VerificationKey2020,
       controller: "did:example:123",
-      publicKeyMultibase: "z6Mks2R1",
       publicKeyJwk: {
         kty: KeyType.EC,
         crv: CurveType.ed25519,
@@ -166,7 +164,6 @@ describe("DID Schemas", () => {
           id: "did:example:123#key-1",
           type: VerificationMethodType.Ed25519VerificationKey2020,
           controller: "did:example:123",
-          publicKeyMultibase: "z6Mks2R1",
           publicKeyJwk: {
             kty: KeyType.EC,
             crv: CurveType.ed25519,

@@ -51,14 +51,18 @@ export class OperationBuilder {
       methodId: ""
     },
     addServiceOptions: {
-      id: "",
-      type: "",
-      serviceEndpoint: Array.of("", "", "", "")
+      service: {
+        id: "",
+        type: "",
+        serviceEndpoint: Array.of("", "", "", "")
+      }
     },
     updateServiceOptions: {
-      id: "",
-      type: "",
-      serviceEndpoint: Array.of("", "", "", "")
+      service: {
+        id: "",
+        type: "",
+        serviceEndpoint: Array.of("", "", "", "")
+      }
     },
     removeServiceOptions: {
       id: ""

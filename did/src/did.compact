@@ -113,15 +113,11 @@ export struct RemoveVerificationMethodRelationOptions {
 }
 
 export struct AddServiceOptions {
-  id: Opaque<"string">,
-  type: Opaque<"string">,
-  serviceEndpoint: Vector<4, Opaque<"string">>,
+  service: Service,
 }
 
 export struct UpdateServiceOptions {
-  id: Opaque<"string">,
-  type: Opaque<"string">,
-  serviceEndpoint: Vector<4, Opaque<"string">>,
+  service: Service
 }
 
 export struct RemoveServiceOptions {
@@ -290,15 +286,25 @@ circuit removeVerificationMethodRelation(
 }
 
 circuit addService(options: AddServiceOptions): [] {
-
+  assert(active, "Contract is not active");
+  const id = options.service.id;
+  assert(!services.member(id), "Service with a given id already exists");
+  services.insert(id, options.service);
 }
 
 circuit updateService(options: UpdateServiceOptions): [] {
-
+  assert(active, "Contract is not active");
+  const id = options.service.id;
+  assert(services.member(id), "Service with a given id does not exist");
+  services.remove(id);
+  services.insert(id, options.service);
 }
 
 circuit removeService(options: RemoveServiceOptions): [] {
-
+  assert(active, "Contract is not active");
+  const id = options.id;
+  assert(services.member(id), "Service with a given id does not exist");
+  services.remove(id);
 }
 
 circuit deactivate(): [] {

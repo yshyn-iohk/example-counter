@@ -1,7 +1,4 @@
-import { log } from "console";
-// midnight-did.test.ts
 import { describe, expect, it } from "vitest";
-import { ZodError } from "zod/v4-mini";
 
 import {
   ContractAddressSchema,

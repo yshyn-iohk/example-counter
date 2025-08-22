@@ -23,7 +23,8 @@ import {
   PublicKeyJwk as LedgerPublicKeyJwk,
   VerificationMethod as LedgerVerificationMethod,
   VerificationMethodRelation as LedgerVerificationMethodRelation,
-  VerificationMethodType as LedgerVerificationMethodType
+  VerificationMethodType as LedgerVerificationMethodType,
+  Service as LedgerService
 } from "./managed/did/contract/index.cjs";
 import {
   ContractAddress as MidnightContractAddress,
@@ -286,14 +287,18 @@ export class DIDDocumentToLedger {
         methodId: ""
       },
       addServiceOptions: {
-        id: "",
-        type: "",
-        serviceEndpoint: Array.of("", "", "", "")
+        service: {
+            id: "",
+            type: "",
+            serviceEndpoint: Array.of("", "", "", "")
+        }
       },
       updateServiceOptions: {
-        id: "",
-        type: "",
-        serviceEndpoint: Array.of("", "", "", "")
+        service: {
+            id: "",
+            type: "",
+            serviceEndpoint: Array.of("", "", "", "")
+        }
       },
       removeServiceOptions: {
         id: ""

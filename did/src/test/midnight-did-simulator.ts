@@ -19,16 +19,19 @@ export class MidnightDIDSimulator {
   readonly contract: Contract<MidnightDIDPrivateState>;
   circuitContext: CircuitContext<MidnightDIDPrivateState>;
 
-  constructor(operations: Array<DIDUpdateOperation> = []) {
-    if (operations.length > 32) {
-      throw new Error("Maximum number of DID operations exceeded: 32");
-    }
+  constructor(secretKey: Uint8Array = Uint8Array.from({ length: 32 }).fill(0)) {
+    let midnightDIDPrivateState: MidnightDIDPrivateState = {
+      secretKey: secretKey
+    };
+
     this.contract = new Contract<MidnightDIDPrivateState>(witnesses);
     const {
       currentPrivateState,
       currentContractState,
       currentZswapLocalState
-    } = this.contract.initialState(constructorContext({}, "0".repeat(64)));
+    } = this.contract.initialState(
+      constructorContext(midnightDIDPrivateState, "0".repeat(64))
+    );
     this.circuitContext = {
       currentPrivateState,
       currentZswapLocalState,

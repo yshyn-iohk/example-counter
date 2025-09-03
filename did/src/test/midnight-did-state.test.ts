@@ -20,8 +20,6 @@ const mockMethod = {
   }
 };
 
-//const emptyOperations = new Array(32).fill(OperationBuilder.undefined());
-
 describe("MidnightDIDSimulator", () => {
   let sim: MidnightDIDSimulator;
 
@@ -47,18 +45,18 @@ describe("MidnightDIDSimulator", () => {
     expect(ledger.verificationMethods.member(mockMethod.id)).toBeTruthy();
   });
 
-  // it("fails to add duplicate verification method", () => {
-  //   sim.applyOperation(
-  //     OperationBuilder.addVerificationMethod({ verificationMethod: mockMethod })
-  //   );
-  //   expect(() =>
-  //     sim.applyOperation(
-  //       OperationBuilder.addVerificationMethod({
-  //         verificationMethod: mockMethod
-  //       })
-  //     )
-  //   ).toThrow();
-  // });
+  it("fails to add duplicate verification method", () => {
+    sim.applyOperation(
+      OperationBuilder.addVerificationMethod({ verificationMethod: mockMethod })
+    );
+    expect(() =>
+      sim.applyOperation(
+        OperationBuilder.addVerificationMethod({
+          verificationMethod: mockMethod
+        })
+      )
+    ).toThrow();
+  });
 
   it("updates a verification method", () => {
     sim.applyOperation(
@@ -134,16 +132,16 @@ describe("MidnightDIDSimulator", () => {
     ).not.toBeTruthy();
   });
 
-  // it("fails to add relation to unknown method", () => {
-  //   expect(() =>
-  //     sim.applyOperation(
-  //       OperationBuilder.addVerificationMethodRelation({
-  //         relation: VerificationMethodRelation.Authentication,
-  //         methodId: mockMethod.id
-  //       })
-  //     )
-  //   ).toThrow();
-  // });
+  it("fails to add relation to unknown method", () => {
+    expect(() =>
+      sim.applyOperation(
+        OperationBuilder.addVerificationMethodRelation({
+          relation: VerificationMethodRelation.Authentication,
+          methodId: mockMethod.id
+        })
+      )
+    ).toThrow();
+  });
 
   it("fails to remove unknown relation", () => {
     sim.applyOperation(
@@ -175,26 +173,27 @@ describe("MidnightDIDSimulator", () => {
     ).toThrow();
   });
 
-  //   it("batch update mode: initializes with multiple operations", () => {
-  //     const operations = [
-  //       OperationBuilder.addVerificationMethod({
-  //         verificationMethod: mockMethod
-  //       }),
-  //       OperationBuilder.addVerificationMethodRelation({
-  //         relation: VerificationMethodRelation.Authentication,
-  //         methodId: mockMethod.id
-  //       })
-  //     ];
-  //     sim = new MidnightDIDSimulator(OperationBuilder.padding(operations));
-  //     const ledger = sim.getLedger();
-  //     expect(ledger.verificationMethods.member(mockMethod.id)).toBeTruthy();
-  //     expect(ledger.authenticationRelation.member(mockMethod.id)).toBeTruthy();
-  //   });
+  it("batch update mode: initializes with multiple operations", () => {
+    const operations = [
+      OperationBuilder.addVerificationMethod({
+        verificationMethod: mockMethod
+      }),
+      OperationBuilder.addVerificationMethodRelation({
+        relation: VerificationMethodRelation.Authentication,
+        methodId: mockMethod.id
+      })
+    ];
+    sim = new MidnightDIDSimulator();
+    sim.applyOperations(OperationBuilder.padding(operations));
+    const ledger = sim.getLedger();
+    expect(ledger.verificationMethods.member(mockMethod.id)).toBeTruthy();
+    expect(ledger.authenticationRelation.member(mockMethod.id)).toBeTruthy();
+  });
 
-  it("throws error when more than 32 operations are passed", () => {
-    const ops = Array.from({ length: 33 }, () => OperationBuilder.deactivate());
-    expect(() => new MidnightDIDSimulator(ops)).toThrow(
-      "Maximum number of DID operations exceeded: 32"
+  it("throws error when more than 8 operations are passed", () => {
+    const ops = Array.from({ length: 9 }, () => OperationBuilder.deactivate());
+    expect(() => new MidnightDIDSimulator().applyOperations(ops)).toThrow(
+      "Cannot pad: input exceeds 8 operations"
     );
   });
 });

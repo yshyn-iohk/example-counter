@@ -13,14 +13,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// This is how we type an empty object.
+import { WitnessContext } from "@midnight-ntwrk/compact-runtime";
+
+import { Ledger } from "./managed/did/contract/index.cjs";
 
 export type MidnightDIDPrivateState = {
-  //TODO: add private keys to protect the state from modification
+  readonly secretKey: Uint8Array;
 };
 
 export const witnesses = {
-  // getEpoch() {
-  //   return Date.now();
-  // }
+  localSecretKey: ({
+    privateState
+  }: WitnessContext<Ledger, MidnightDIDPrivateState>): [
+    MidnightDIDPrivateState,
+    Uint8Array
+  ] => [privateState, privateState.secretKey]
 };

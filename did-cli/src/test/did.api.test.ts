@@ -71,7 +71,8 @@ describe('Midnight DID', () => {
   });
 
   it('should be published by the contract to the Midnight blockchain with empty state [@slow]', async () => {
-    contract = await api.createDID(providers, {});
+    const privateState = await api.initPrivateState(providers);
+    contract = await api.createDID(providers, privateState);
     expect(contract).not.toBeNull();
 
     contractAddress = parseContractAddress(contract.deployTxData.public.contractAddress);

@@ -61,7 +61,8 @@ const mainLoop = async (providers: MidnightDIDProviders, rli: Interface): Promis
     const choice = await rli.question(MAIN_LOOP_QUESTIONS);
     switch (choice) {
       case '1': {
-        await api.createDID(providers, {});
+        const privateState = await api.initPrivateState(providers);
+        await api.createDID(providers, privateState);
         logger.info('DID created successfully.');
         break;
       }

@@ -1,8 +1,9 @@
 import { describe, expect, it } from "vitest";
 
-import { CurveType, KeyType } from "../did-document";
 import { OperationBuilder } from "../ledger-operation-builder";
 import {
+  CurveType,
+  KeyType,
   OperationType,
   VerificationMethodRelation,
   VerificationMethodType

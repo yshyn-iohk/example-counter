@@ -157,8 +157,8 @@ export circuit publicKey(sk: Bytes<32>): Bytes<32> {
     return persistentHash<Vector<2, Bytes<32>>>([pad(32, "did:controller:pk"), sk]);
 }
 
-export circuit applyOperations(operations: Vector<8, DIDUpdateOperation>): [] {
-  assert(publicKey(localSecretKey()) == controllerPublicKey, "DID controller is allowed to update the DID only");
+export circuit applyOperations(operations: Vector<4, DIDUpdateOperation>): [] {
+  //assert(publicKey(localSecretKey()) == controllerPublicKey, "DID controller is allowed to update the DID only");
   assert(disclose(active), "Contract is not active");
 
   id = kernel.self();

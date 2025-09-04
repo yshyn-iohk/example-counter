@@ -190,10 +190,10 @@ describe("MidnightDIDSimulator", () => {
     expect(ledger.authenticationRelation.member(mockMethod.id)).toBeTruthy();
   });
 
-  it("throws error when more than 8 operations are passed", () => {
-    const ops = Array.from({ length: 9 }, () => OperationBuilder.deactivate());
+  it("throws error when more than 5 operations are passed", () => {
+    const ops = Array.from({ length: 5 }, () => OperationBuilder.deactivate());
     expect(() => new MidnightDIDSimulator().applyOperations(ops)).toThrow(
-      "Cannot pad: input exceeds 8 operations"
+      "Cannot pad: input exceeds 4 operations"
     );
   });
 });

@@ -158,7 +158,7 @@ export class OperationBuilder {
   }
 
   static padding(operations: DIDUpdateOperation[]): DIDUpdateOperation[] {
-    const MAX_OPERATIONS = 8;
+    const MAX_OPERATIONS = 4;
     if (operations.length > MAX_OPERATIONS) {
       throw new Error(`Cannot pad: input exceeds ${MAX_OPERATIONS} operations`);
     }

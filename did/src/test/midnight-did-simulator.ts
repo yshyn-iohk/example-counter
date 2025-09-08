@@ -5,7 +5,6 @@ import {
   sampleContractAddress
 } from "@midnight-ntwrk/compact-runtime";
 
-import { DIDDocumentToLedger } from "../ledger-mapping";
 import { OperationBuilder } from "../ledger-operation-builder";
 import {
   Contract,

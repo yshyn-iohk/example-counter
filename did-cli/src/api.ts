@@ -20,9 +20,9 @@ import { type ContractAddress } from '@midnight-ntwrk/compact-runtime';
 import {
   DIDContract,
   DIDDocument,
-  DIDDocumentToLedger,
   DIDOperation,
-  LedgerToDIDDocument,
+  DomainToLedger,
+  LedgerToDomain,
   MidnightDIDPrivateState,
   MidnightNetwork,
   OperationBuilder,
@@ -77,7 +77,7 @@ export const getMidnightDIDLedgerState = async (
   const state = await providers.publicDataProvider
     .queryContractState(contractAddress)
     .then((contractState) => (contractState != null ? DIDContract.ledger(contractState.data) : null));
-  if (state != null || state != undefined) logger.info(LedgerToDIDDocument.toJSON(state));
+  if (state != null || state != undefined) logger.info(LedgerToDomain.toJSON(state));
 
   if (state != null && state?.verificationMethods != null) {
     for (const [id, method] of state!.verificationMethods) {
@@ -181,7 +181,7 @@ export const update = async (
 
   logger.info(`Updating DID at contract address: ${didContract.deployTxData.public.contractAddress}`);
 
-  let ledgerOperations = DIDDocumentToLedger.updateOperations(patches);
+  let ledgerOperations = DomainToLedger.updateOperations(patches);
   logger.info('Ledger operations:');
   ledgerOperations.map((lo) => logger.info(JSON.stringify(lo, BigIntReplacer, 2)));
 
@@ -238,7 +238,7 @@ export const resolve = async (
     logger.info(`There is no Midnight DID contract deployed at ${contractAddress}.`);
     return null;
   } else {
-    let didDocument = LedgerToDIDDocument.ledgerStateToDIDDocument(
+    let didDocument = LedgerToDomain.ledgerStateToDIDDocument(
       didContractState,
       midnightNetwork,
       midnightContractAddress,

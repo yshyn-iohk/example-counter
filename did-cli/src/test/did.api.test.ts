@@ -185,38 +185,6 @@ describe('Midnight DID', () => {
           },
         },
       },
-      // {
-      //   type: DIDOperationType.AddVerificationMethodRelation,
-      //   relation: VerificationMethodRelationType.AssertionMethod,
-      //   methodId: methodId
-      // },
-    ];
-
-    const result = await api.update(contract, operations);
-    expect(result.txId).toMatch(/[0-9a-f]{64}/);
-
-    const didDoc = await api.resolve(providers, contract);
-    logger.info(`DIDDocument JSON: ${JSON.stringify(didDoc, BigIntReplacer, 2)}`);
-
-    expect(didDoc?.verificationMethod).not.toBeNull();
-
-    const insertedVerificationMethod = didDoc?.verificationMethod?.find((vm) => vm.id === methodId);
-    expect(insertedVerificationMethod).not.toBeNull;
-    expect(insertedVerificationMethod?.type).toEqual(VerificationMethodType.Ed25519VerificationKey2020);
-  });
-
-  it('should update DID with the new verification method using the batch operation (2)', async () => {
-    const methodId = parseDIDKeyID(`${didString}#key-2`);
-    const operations: DIDOperation[] = [
-      // {
-      //   type: DIDOperationType.AddVerificationMethod,
-      //   verificationMethod: {
-      //     id: methodId,
-      //     type: VerificationMethodType.Ed25519VerificationKey2020,
-      //     controller: didString,
-      //     publicKeyMultibase: publicKeyMultibase
-      //   }
-      // },
       {
         type: DIDOperationType.AddVerificationMethodRelation,
         relation: VerificationMethodRelationType.AssertionMethod,
@@ -235,8 +203,5 @@ describe('Midnight DID', () => {
     const insertedVerificationMethod = didDoc?.verificationMethod?.find((vm) => vm.id === methodId);
     expect(insertedVerificationMethod).not.toBeNull;
     expect(insertedVerificationMethod?.type).toEqual(VerificationMethodType.Ed25519VerificationKey2020);
-
-    //use this code to freeze the docker environment setup
-    // await new Promise(resolve => setTimeout(resolve, 50 * 60 * 1000));
   });
 });

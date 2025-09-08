@@ -187,14 +187,16 @@ export const update = async (
 
   let ledgerOperationsWithPadding = OperationBuilder.padding(ledgerOperations);
 
-  const verifiedOperations = OperationBuilder.verifyOperations(ledgerOperationsWithPadding);
+  //logger.info(JSON.stringify(ledgerOperationsWithPadding, BigIntReplacer, 2));
 
-  logger.info('DIDUpdateOperations:');
-  verifiedOperations.map((op) => {
-    if (op.operationType != DIDContract.OperationType.Undefined) logger.info(JSON.stringify(op, BigIntReplacer, 2));
-  });
+  //const verifiedOperations = OperationBuilder.verifyOperations(ledgerOperationsWithPadding);
 
-  const finalizedTxData = await didContract.callTx.applyOperations(verifiedOperations);
+  // logger.info('DIDUpdateOperations:');
+  // verifiedOperations.map((op) => {
+  //   if (op.operationType != DIDContract.OperationType.Undefined) logger.info(JSON.stringify(op, BigIntReplacer, 2));
+  // });
+
+  const finalizedTxData = await didContract.callTx.applyOperations(ledgerOperationsWithPadding);
 
   logger.info(`Transaction ${finalizedTxData.public.txId} added in block ${finalizedTxData.public.blockHeight}`);
 

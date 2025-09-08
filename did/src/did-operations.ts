@@ -1,6 +1,7 @@
 import { z } from "zod/v4-mini";
 
 import {
+  Service,
   VerificationMethod,
   VerificationMethodRelation,
   VerificationMethodRelationTypeSchema,
@@ -16,8 +17,9 @@ export enum DIDOperationType {
   RemoveVerificationMethod = "RemoveVerificationMethod",
   AddVerificationMethodRelation = "AddVerificationMethodRelation",
   RemoveVerificationMethodRelation = "RemoveVerificationMethodRelation",
-  //TODO: add AddService
-  //TODO: add RemoveService
+  AddService = "AddService",
+  UpdateService = "UpdateService",
+  RemoveService = "RemoveService",
   Deactivate = "Deactivate"
 }
 
@@ -46,6 +48,18 @@ export type DIDOperation =
       type: DIDOperationType.RemoveVerificationMethodRelation;
       relation: VerificationMethodRelation;
       methodId: string;
+    }
+  | {
+      type: DIDOperationType.AddService;
+      service: Service;
+    }
+  | {
+      type: DIDOperationType.UpdateService;
+      service: Service;
+    }
+  | {
+      type: DIDOperationType.RemoveService;
+      serviceId: string;
     }
   | {
       type: DIDOperationType.Deactivate;

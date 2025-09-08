@@ -172,10 +172,10 @@ export class OperationBuilder {
   static verifyOperations(
     operations: DIDUpdateOperation[]
   ): DIDUpdateOperation[] {
-    // Basic shape check: must be an array of exactly 8 operations
-    if (!Array.isArray(operations) || operations.length !== 8) {
+    // Basic shape check: must be an array of exactly 4 operations
+    if (!Array.isArray(operations) || operations.length !== 4) {
       throw new Error(
-        "Invalid operations: must be an array of exactly 8 items"
+        "Invalid operations: must be an array of exactly 4 items"
       );
     }
 

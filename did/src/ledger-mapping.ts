@@ -8,11 +8,15 @@ import {
   DIDDocument,
   KeyType,
   PublicKeyJwk,
+  Service,
   VerificationMethod,
   VerificationMethodRelationType,
   VerificationMethodType
 } from "./did-document";
-import { DIDOperation, DIDOperationType } from "./did-operations";
+import {
+  DIDOperation as DomainUpdateOperation,
+  DIDOperationType
+} from "./did-operations";
 import { OperationBuilder } from "./ledger-operation-builder";
 import {
   CurveType as LedgerCurveType,
@@ -244,6 +248,14 @@ export class DIDDocumentToLedger {
     };
   }
 
+  static service(service: Service): LedgerService {
+    return {
+      id: service.id,
+      type: this.serviceType(service.type),
+      serviceEndpoint: this.serviceEndpoint(service.serviceEndpoint)
+    };
+  }
+
   static readonly OperationMap: Record<DIDOperationType, LedgerOperationType> =
     {
       [DIDOperationType.AddVerificationMethod]:
@@ -256,6 +268,9 @@ export class DIDDocumentToLedger {
         LedgerOperationType.AddVerificationMethodRelation,
       [DIDOperationType.RemoveVerificationMethodRelation]:
         LedgerOperationType.RemoveVerificationMethodRelation,
+      [DIDOperationType.AddService]: LedgerOperationType.AddService,
+      [DIDOperationType.UpdateService]: LedgerOperationType.UpdateService,
+      [DIDOperationType.RemoveService]: LedgerOperationType.RemoveService,
       [DIDOperationType.Deactivate]: LedgerOperationType.Deactivate
     };
 
@@ -306,7 +321,9 @@ export class DIDDocumentToLedger {
     };
   }
 
-  static updateOperation(updateOperation: DIDOperation): LedgerUpdateOperation {
+  static updateOperation(
+    updateOperation: DomainUpdateOperation
+  ): LedgerUpdateOperation {
     const { type } = updateOperation;
     let ledgerUpdateOperation = this.defaultLedgerUpdateOperation();
     ledgerUpdateOperation.operationType = this.OperationMap[type];
@@ -345,13 +362,65 @@ export class DIDDocumentToLedger {
         return ledgerUpdateOperation;
       case DIDOperationType.Deactivate:
         return ledgerUpdateOperation;
+      case DIDOperationType.AddService: {
+        const serviceToAdd = this.service(updateOperation.service);
+        ledgerUpdateOperation.addServiceOptions = {
+          service: serviceToAdd
+        };
+        return ledgerUpdateOperation;
+      }
+      case DIDOperationType.UpdateService: {
+        const serviceToUpdate = this.service(updateOperation.service);
+        ledgerUpdateOperation.updateServiceOptions = {
+          service: serviceToUpdate
+        };
+        return ledgerUpdateOperation;
+      }
+      case DIDOperationType.RemoveService:
+        ledgerUpdateOperation.removeServiceOptions = {
+          id: updateOperation.serviceId
+        };
+        return ledgerUpdateOperation;
       default:
         throw new Error(`Unsupported operation type: ${type}`);
     }
   }
 
+  static serviceType(serviceType: string | string[]): string {
+    if (typeof serviceType === "string") return serviceType;
+
+    if (Array.isArray(serviceType) && serviceType.length === 1)
+      return serviceType[0];
+
+    throw new Error(
+      "service type property must be a string or an array with exactly one element"
+    );
+  }
+
+  static serviceEndpoint(serviceEndpoint: string | string[]): string[] {
+    let ledgerServiceEndpoint: string[];
+
+    if (typeof serviceEndpoint === "string") {
+      ledgerServiceEndpoint = [serviceEndpoint, "", "", ""];
+    } else if (Array.isArray(serviceEndpoint)) {
+      if (serviceEndpoint.length > 4)
+        throw new Error(
+          `serviceEndpoint property must contain at most four elements`
+        );
+
+      ledgerServiceEndpoint = [...serviceEndpoint];
+      while (ledgerServiceEndpoint.length < 4) {
+        ledgerServiceEndpoint.push("");
+      }
+    } else {
+      throw new Error("Invalid type for serviceEndpoint");
+    }
+
+    return ledgerServiceEndpoint;
+  }
+
   static updateOperations(
-    operations: Array<DIDOperation>
+    operations: Array<DomainUpdateOperation>
   ): Array<LedgerUpdateOperation> {
     return operations.map((op) => this.updateOperation(op));
   }

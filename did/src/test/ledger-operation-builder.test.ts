@@ -79,9 +79,9 @@ describe("OperationBuilder", () => {
       type: "LinkedDomains",
       serviceEndpoint: ["https://example.com"]
     };
-    const op = OperationBuilder.addService(service);
+    const op = OperationBuilder.addService({ service: service });
     expect(op.operationType).toBe(OperationType.AddService);
-    expect(op.addServiceOptions).toEqual(service);
+    expect(op.addServiceOptions.service).toEqual(service);
   });
 
   it("should build updateService operation", () => {
@@ -90,9 +90,9 @@ describe("OperationBuilder", () => {
       type: "LinkedDomains",
       serviceEndpoint: ["https://example.org"]
     };
-    const op = OperationBuilder.updateService(service);
+    const op = OperationBuilder.updateService({ service: service });
     expect(op.operationType).toBe(OperationType.UpdateService);
-    expect(op.updateServiceOptions).toEqual(service);
+    expect(op.updateServiceOptions.service).toEqual(service);
   });
 
   it("should build removeService operation", () => {

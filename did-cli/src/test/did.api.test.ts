@@ -23,14 +23,14 @@ import {
   KeyType,
   MidnightDIDSchema,
   MidnightDIDString,
-  //OperationBuilder,
   parseContractAddress,
+  parseService,
   parseDIDKeyID,
   parseMidnightDID,
   parseMidnightDIDString,
-  //VerificationMethodRelation,
   VerificationMethodRelationType,
   VerificationMethodType,
+  OperationBuilder,
 } from '@midnight-ntwrk/did-contract';
 import { type Resource } from '@midnight-ntwrk/wallet';
 import { type Wallet } from '@midnight-ntwrk/wallet-api';
@@ -42,6 +42,7 @@ import { DeployedMidnightDIDContract, type MidnightDIDProviders } from '../commo
 import { currentDir } from '../config';
 import { BigIntReplacer, createLogger } from '../logger-utils';
 import { TestEnvironment } from './commons';
+import { AddServiceOptions } from '@midnight-ntwrk/did-contract/dist/managed/did/contract/index.cjs';
 
 const logDir = path.resolve(currentDir, '..', 'logs', 'tests', `${new Date().toISOString()}.log`);
 const logger = await createLogger(logDir);
@@ -203,5 +204,34 @@ describe('Midnight DID', () => {
     const insertedVerificationMethod = didDoc?.verificationMethod?.find((vm) => vm.id === methodId);
     expect(insertedVerificationMethod).not.toBeNull;
     expect(insertedVerificationMethod?.type).toEqual(VerificationMethodType.Ed25519VerificationKey2020);
+  });
+
+  it('should update DID with the new service endpoint', async () => {
+    const serviceToAdd = parseService({
+        id: "didcomm-1",
+        type: "DIDCommV2",
+        serviceEndpoint: ["https://localhost/didcomm/v2", "wss://localhost/didcomm/v2"]
+    });
+    
+    const operations: DIDOperation[] = [
+      {
+        type: DIDOperationType.AddService,
+        service: serviceToAdd
+      },
+    ];
+
+    const result = await api.update(contract, operations);
+    expect(result.txId).toMatch(/[0-9a-f]{64}/);
+
+    const didDoc = await api.resolve(providers, contract);
+    logger.info(`DIDDocument JSON: ${JSON.stringify(didDoc, BigIntReplacer, 2)}`);
+
+    expect(didDoc?.service).not.toBeNull();
+    const service = didDoc?.service!;
+
+    expect(service.length).toBe(1);
+    expect(service[0].id).toBe(serviceToAdd.id);
+    expect(service[0].type).toBe(serviceToAdd.type)
+    expect(service[0].serviceEndpoint).toEqual(serviceToAdd.serviceEndpoint);
   });
 });

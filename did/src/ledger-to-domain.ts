@@ -7,6 +7,7 @@ import {
   CurveType,
   DIDDocument,
   KeyType,
+  parseService,
   PublicKeyJwk,
   Service,
   VerificationMethod,
@@ -87,6 +88,15 @@ export class LedgerToDomain {
     };
   }
 
+  static service(service: LedgerService): Service {
+    const serviceEndpoint = service.serviceEndpoint.filter((endpoint => endpoint.trim() !== ""));
+    return parseService({
+      id: service.id,
+      type: service.type,
+      serviceEndpoint: serviceEndpoint
+    });
+  }
+
   static toJSON(ledger: Ledger): object {
     return {
       id: Buffer.from(ledger.id.bytes).toString("hex"),
@@ -110,11 +120,9 @@ export class LedgerToDomain {
       capabilityDelegationRelation: Array.from(
         ledger.capabilityDelegationRelation
       ),
-      services: Array.from(ledger.services, ([id, service]) => ({
-        id,
-        type: service.type,
-        serviceEndpoint: service.serviceEndpoint
-      }))
+      services: Array.from(ledger.services, (
+        [id, service]) => this.service(service)
+      )
     };
   }
 
@@ -168,6 +176,12 @@ export class LedgerToDomain {
       ? undefined
       : Array.from(ledger.keyAgreementRelation);
 
+    const service = ledger.services.isEmpty()
+      ? undefined
+      : Array.from(ledger.services, 
+        ([id, service]) => this.service(service)
+      );      
+
     const didDocument = createDIDDocument({
       id: did,
       context: MidnightDIDDocumentContext,
@@ -179,7 +193,7 @@ export class LedgerToDomain {
       keyAgreement: keyAgreement,
       capabilityInvocation: capabilityInvocation,
       capabilityDelegation: capabilityDelegation,
-      service: undefined //TODO
+      service: service,
     });
 
     return didDocument;

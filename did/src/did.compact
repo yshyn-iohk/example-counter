@@ -37,8 +37,7 @@ witness localSecretKey(): Bytes<32>;
 
 export enum VerificationMethodType {
   Undefined,
-  Ed25519VerificationKey2020,
-  JubJubVerificationKey2025
+  JsonWebKey
 }
 
 export enum VerificationMethodRelation {

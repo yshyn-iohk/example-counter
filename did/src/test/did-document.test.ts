@@ -37,7 +37,7 @@ describe("DID Schemas", () => {
   it("creates and validates VerificationMethod", () => {
     const vm = createVerificationMethod({
       id: "did:example:123#key-1",
-      type: VerificationMethodType.Ed25519VerificationKey2020,
+      type: VerificationMethodType.JsonWebKey,
       controller: "did:example:123",
       publicKeyJwk: {
         kty: KeyType.EC,
@@ -65,7 +65,7 @@ describe("DID Schemas", () => {
       verificationMethod: [
         createVerificationMethod({
           id: "did:example:123#key-1",
-          type: VerificationMethodType.Ed25519VerificationKey2020,
+          type: VerificationMethodType.JsonWebKey,
           controller: "did:example:123",
           publicKeyJwk: {
             kty: KeyType.EC,
@@ -132,7 +132,7 @@ describe("DID Schemas", () => {
   it("creates and validates VerificationMethod", () => {
     const vm = createVerificationMethod({
       id: "did:example:123#key-1",
-      type: VerificationMethodType.Ed25519VerificationKey2020,
+      type: VerificationMethodType.JsonWebKey,
       controller: "did:example:123",
       publicKeyJwk: {
         kty: KeyType.EC,
@@ -162,7 +162,7 @@ describe("DID Schemas", () => {
       verificationMethod: [
         createVerificationMethod({
           id: "did:example:123#key-1",
-          type: VerificationMethodType.Ed25519VerificationKey2020,
+          type: VerificationMethodType.JsonWebKey,
           controller: "did:example:123",
           publicKeyJwk: {
             kty: KeyType.EC,

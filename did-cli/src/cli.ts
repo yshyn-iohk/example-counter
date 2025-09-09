@@ -168,17 +168,13 @@ async function promptForVerificationMethod(rli: Interface, did: MidnightDIDStrin
 
   const verificationMethodTypeInput = await rli.question(`
 Enter Verification Method type:'
- 1. ${VerificationMethodType.Ed25519VerificationKey2020}
- 2. ${VerificationMethodType.JubJubVerificationKey2025}
+ 1. ${VerificationMethodType.JsonWebKey}
 `);
 
   let verificationMethodType: VerificationMethodType = VerificationMethodType.Undefined;
   switch (verificationMethodTypeInput) {
     case '1':
-      verificationMethodType = VerificationMethodType.Ed25519VerificationKey2020;
-      break;
-    case '2':
-      verificationMethodType = VerificationMethodType.JubJubVerificationKey2025;
+      verificationMethodType = VerificationMethodType.JsonWebKey;
       break;
   }
 

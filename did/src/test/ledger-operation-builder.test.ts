@@ -12,7 +12,7 @@ import {
 describe("OperationBuilder", () => {
   const sampleVM = {
     id: "key-1",
-    type: VerificationMethodType.Ed25519VerificationKey2020,
+    type: VerificationMethodType.JsonWebKey,
     publicKeyJwk: {
       kty: KeyType.EC,
       crv: CurveType.ed25519,

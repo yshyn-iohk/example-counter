@@ -114,7 +114,7 @@ describe('Midnight DID method API', () => {
   });
 
   //TODO: change the VerificationMethodType to JsonWebKey
-  it(`should add the verification method with ${VerificationMethodType.JubJubVerificationKey2025} public key`, async () => {
+  it(`should add the verification method with ${VerificationMethodType.JsonWebKey} public key`, async () => {
     const methodId = parseDIDKeyID(`${didString}#key-1`);
     const publicKeyJwk = {
       kty: KeyType.EC,
@@ -128,7 +128,7 @@ describe('Midnight DID method API', () => {
         type: DIDOperationType.AddVerificationMethod,
         verificationMethod: {
           id: methodId,
-          type: VerificationMethodType.JubJubVerificationKey2025,
+          type: VerificationMethodType.JsonWebKey,
           controller: didString,
           publicKeyJwk: publicKeyJwk,
         },
@@ -145,7 +145,7 @@ describe('Midnight DID method API', () => {
     const insertedVerificationMethod = didDocument?.verificationMethod?.find((vm) => vm.id === methodId);
 
     expect(insertedVerificationMethod).not.toBeNull;
-    expect(insertedVerificationMethod?.type).toEqual(VerificationMethodType.JubJubVerificationKey2025);
+    expect(insertedVerificationMethod?.type).toEqual(VerificationMethodType.JsonWebKey);
     expect(insertedVerificationMethod?.controller).toEqual(didString);
     expect(insertedVerificationMethod?.publicKeyJwk).toEqual(publicKeyJwk);
   });
@@ -175,7 +175,7 @@ describe('Midnight DID method API', () => {
         type: DIDOperationType.AddVerificationMethod,
         verificationMethod: {
           id: methodId,
-          type: VerificationMethodType.Ed25519VerificationKey2020,
+          type: VerificationMethodType.JsonWebKey,
           controller: didString,
           publicKeyJwk: {
             kty: KeyType.EC,
@@ -202,7 +202,7 @@ describe('Midnight DID method API', () => {
 
     const insertedVerificationMethod = didDoc?.verificationMethod?.find((vm) => vm.id === methodId);
     expect(insertedVerificationMethod).not.toBeNull;
-    expect(insertedVerificationMethod?.type).toEqual(VerificationMethodType.Ed25519VerificationKey2020);
+    expect(insertedVerificationMethod?.type).toEqual(VerificationMethodType.JsonWebKey);
   });
 
   it('should update the DID by adding a new service endpoint', async () => {

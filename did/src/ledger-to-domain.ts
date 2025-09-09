@@ -55,10 +55,7 @@ export class LedgerToDomain {
     VerificationMethodType
   > = {
     [LedgerVerificationMethodType.Undefined]: VerificationMethodType.Undefined,
-    [LedgerVerificationMethodType.Ed25519VerificationKey2020]:
-      VerificationMethodType.Ed25519VerificationKey2020,
-    [LedgerVerificationMethodType.JubJubVerificationKey2025]:
-      VerificationMethodType.JubJubVerificationKey2025
+    [LedgerVerificationMethodType.JsonWebKey]: VerificationMethodType.JsonWebKey
   };
 
   static readonly VerificationMethodRelationMap: Record<
@@ -89,7 +86,9 @@ export class LedgerToDomain {
   }
 
   static service(service: LedgerService): Service {
-    const serviceEndpoint = service.serviceEndpoint.filter((endpoint => endpoint.trim() !== ""));
+    const serviceEndpoint = service.serviceEndpoint.filter(
+      (endpoint) => endpoint.trim() !== ""
+    );
     return parseService({
       id: service.id,
       type: service.type,
@@ -120,8 +119,8 @@ export class LedgerToDomain {
       capabilityDelegationRelation: Array.from(
         ledger.capabilityDelegationRelation
       ),
-      services: Array.from(ledger.services, (
-        [id, service]) => this.service(service)
+      services: Array.from(ledger.services, ([id, service]) =>
+        this.service(service)
       )
     };
   }
@@ -178,9 +177,7 @@ export class LedgerToDomain {
 
     const service = ledger.services.isEmpty()
       ? undefined
-      : Array.from(ledger.services, 
-        ([id, service]) => this.service(service)
-      );      
+      : Array.from(ledger.services, ([id, service]) => this.service(service));
 
     const didDocument = createDIDDocument({
       id: did,
@@ -193,7 +190,7 @@ export class LedgerToDomain {
       keyAgreement: keyAgreement,
       capabilityInvocation: capabilityInvocation,
       capabilityDelegation: capabilityDelegation,
-      service: service,
+      service: service
     });
 
     return didDocument;

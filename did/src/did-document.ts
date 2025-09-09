@@ -48,8 +48,7 @@ export type DIDString = z.infer<typeof DIDStringSchema>;
 /** Verification Method Types */
 export enum VerificationMethodType {
   Undefined = "Undefined",
-  Ed25519VerificationKey2020 = "Ed25519VerificationKey2020",
-  JubJubVerificationKey2025 = "JubJubVerificationKey2025"
+  JsonWebKey = "JsonWebKey"
 }
 export const VerificationMethodTypeSchema = z.enum(VerificationMethodType);
 

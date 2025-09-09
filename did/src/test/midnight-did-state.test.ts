@@ -9,9 +9,12 @@ import {
 } from "../managed/did/contract/index.cjs";
 import { MidnightDIDSimulator } from "./midnight-did-simulator";
 
+export const BigIntReplacer = (_key: string, value: unknown) =>
+  typeof value === "bigint" ? value.toString() : value;
+
 const mockMethod = {
   id: "did:midnight:xyz#key-1",
-  type: VerificationMethodType.Ed25519VerificationKey2020,
+  type: VerificationMethodType.JsonWebKey,
   publicKeyJwk: {
     kty: KeyType.EC,
     crv: CurveType.ed25519,
@@ -39,9 +42,11 @@ describe("MidnightDIDSimulator", () => {
   });
 
   it("adds a verification method", () => {
-    const ledger = sim.applyOperation(
-      OperationBuilder.addVerificationMethod({ verificationMethod: mockMethod })
-    );
+    const operation = OperationBuilder.addVerificationMethod({
+      verificationMethod: mockMethod
+    });
+    const operations = OperationBuilder.padding(Array.of(operation));
+    const ledger = sim.applyOperations(operations);
     expect(ledger.verificationMethods.member(mockMethod.id)).toBeTruthy();
   });
 
@@ -183,6 +188,7 @@ describe("MidnightDIDSimulator", () => {
         methodId: mockMethod.id
       })
     ];
+
     sim = new MidnightDIDSimulator();
     sim.applyOperations(OperationBuilder.padding(operations));
     const ledger = sim.getLedger();

@@ -54,10 +54,7 @@ export class DomainToLedger {
     LedgerVerificationMethodType
   > = {
     [VerificationMethodType.Undefined]: LedgerVerificationMethodType.Undefined,
-    [VerificationMethodType.Ed25519VerificationKey2020]:
-      LedgerVerificationMethodType.Ed25519VerificationKey2020,
-    [VerificationMethodType.JubJubVerificationKey2025]:
-      LedgerVerificationMethodType.JubJubVerificationKey2025
+    [VerificationMethodType.JsonWebKey]: LedgerVerificationMethodType.JsonWebKey
   };
 
   static readonly VerificationMethodRelationMap: Record<

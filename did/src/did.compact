@@ -17,6 +17,7 @@ pragma language_version 0.16;
 
 import CompactStandardLibrary;
 
+export ledger contractVersion: Uint<32>;
 export ledger controllerPublicKey: Bytes<32>;
 export ledger id: ContractAddress;
 export ledger version: Counter;
@@ -137,6 +138,7 @@ export struct DIDUpdateOperation {
 
 constructor() {
   //TODO: clarify with the Midnight team why `id` is not set correctly (did.api.test.ts)
+  contractVersion = 1;
   id = kernel.self();
   active = true;
   controllerPublicKey = disclose(publicKey(localSecretKey()));
